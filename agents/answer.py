@@ -1,47 +1,51 @@
 """Your agent: a question in, a structured answer out.
 
-Yours to rewrite. One thing is fixed — `main(question) -> dict` must exist, because we
-call it directly:
-
     python -m agents.answer "which manager held the largest Apple position in 2026 Q2?"
 
-Return this shape. Nothing else on stdout.
+Architecture (see submission/ASSUMPTIONS.md for the reasoning):
 
-    {
-      "answer":  <number | string | list | null>,
-      "unit":    "USD" | "SHARES" | "COUNT" | "PERCENT" | "NAME" | "DATE" | "NONE",
-      "sources": ["0001423053-26-000012", ...]
-    }
+    question -> planner.plan_query()   LLM, schema-constrained -> QueryPlan
+             -> executor.execute()     pure pandas over the read-only Parquet files
+             -> this module            formats {"answer", "unit", "sources"}
 
-`sources` is graded separately from `answer`, and it is the more diagnostic of the two.
-An agent that produces the right number without knowing which filings it came from is
-not one a researcher can trust with a question they cannot check by hand.
-
-Put logging on stderr. stdout carries the JSON and nothing else.
-
-See agents/llm.py for the model interface, and docs/04-serve.md for what is graded.
+The LLM only ever sees the user's question text; it never sees filing-sourced free
+text (name_of_issuer / title_of_class), and it never produces anything that gets
+executed as code or SQL -- only whitelisted enum/string fields that planner.py
+validates before executor.py touches the data. Manager/issuer name resolution
+happens locally in data.py via string matching, not through the model.
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import sys
-from pathlib import Path
 from typing import Any
 
-OUTPUT = Path(__file__).resolve().parents[1] / "output"
-FILINGS = OUTPUT / "filings.parquet"
-HOLDINGS = OUTPUT / "holdings.parquet"
+from agents import executor, planner
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s", stream=sys.stderr)
+logger = logging.getLogger(__name__)
 
 VALID_UNITS = {"USD", "SHARES", "COUNT", "PERCENT", "NAME", "DATE", "NONE"}
 
 
 def main(question: str) -> dict[str, Any]:
-    """Answer `question` against your dataset.
+    """Answer `question` against the dataset. Never raises -- a failure is a null answer.
 
     Do not rename this function or change its signature.
     """
-    raise NotImplementedError("Implement your agent here. See docs/04-serve.md.")
+    try:
+        plan = planner.plan_query(question)
+        result = executor.execute(plan)
+    except Exception as exc:  # noqa: BLE001 -- a crash must still score as a null answer
+        logger.warning("could not answer %r: %s", question, exc)
+        return {"answer": None, "unit": "NONE", "sources": []}
+
+    if result.answer is None and result.note:
+        logger.info("null answer for %r: %s", question, result.note)
+
+    return {"answer": result.answer, "unit": result.unit, "sources": result.sources}
 
 
 def _cli() -> int:
