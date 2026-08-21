@@ -35,7 +35,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-CACHE_DIR = Path("output/.cache")
+CACHE_DIR = Path(".cache")
 MANIFEST_PATH = CACHE_DIR / "manifest.jsonl"
 
 # SEC's limit is 10 req/sec; stay under it with margin.
