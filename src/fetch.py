@@ -1,19 +1,25 @@
-"""
-fetch.py -- SEC fetch helper with caching, rate-limiting, and a proper User-Agent.
+"""fetch.py
 
-All outbound network requests in Chapter 1 (CIK lookup table, submissions API,
-archive directory, XML files) should go through this module's fetch() function.
-Reasons:
-  1. SEC requires every request to carry a User-Agent; omitting it fails the whole
-     chapter outright.
-  2. SEC caps requests at 10/second; throttling is centralized here instead of being
-     duplicated at every call site.
-  3. The pipeline must run twice with the second run noticeably faster -- the caching
-     logic lives here so every caller automatically gets cache-and-resume behavior.
+Cached, rate-limited HTTP client for SEC EDGAR requests.
+
+All outbound requests in Chapter 1 (CIK lookup file, submissions API,
+archive directory listings, filing XML) go through fetch() rather than
+calling httpx directly:
+
+  1. SEC requires a User-Agent on every request.
+  2. SEC caps clients at 10 req/sec; throttling is centralized here.
+  3. The pipeline is run twice and the second run must be substantially
+     faster with identical output; caching is centralized here so every
+     caller gets cache-and-resume behavior automatically.
+
+The User-Agent is not a module-level constant. main.py owns the
+--user-agent CLI flag and calls set_user_agent() once at startup;
+downstream modules under src/ call fetch(url) without repeating it.
 
 Usage:
-    from fetch import fetch
-    raw_bytes = fetch("https://data.sec.gov/submissions/CIK0001037389.json")
+    from fetch import fetch, set_user_agent
+    set_user_agent(args.user_agent)
+    raw = fetch("https://data.sec.gov/submissions/CIK0001037389.json")
 """
 
 from __future__ import annotations
@@ -25,39 +31,43 @@ import time
 from pathlib import Path
 from urllib.parse import urlparse
 
-import requests
+import httpx
 
 logger = logging.getLogger(__name__)
-
-# ---------------------------------------------------------------------------
-# Config: fill in your own name and illinois.edu email; SEC requires this format.
-# Do not leave it blank or use someone else's info -- a missing or malformed
-# User-Agent fails Chapter 1 outright, the one "zero tolerance" condition in the spec.
-# ---------------------------------------------------------------------------
-USER_AGENT = "Hsuan-Yu Shih hsuanyu5@illinois.edu"  # TODO: replace with your real info
 
 CACHE_DIR = Path("output/.cache")
 MANIFEST_PATH = CACHE_DIR / "manifest.jsonl"
 
-# SEC's cap is 10 requests/second; we deliberately target 8/second here to leave a
-# safety margin, so the program's own execution latency doesn't push the actual rate
-# right up against the limit.
+# SEC's limit is 10 req/sec; stay under it with margin.
 MIN_INTERVAL_SECONDS = 1.0 / 8.0
 
-# Backoff seconds when rate-limited (429); exponential backoff, gives up after a max
-# number of retries.
+# Exponential backoff on 429, bounded retry count.
 INITIAL_BACKOFF_SECONDS = 2.0
 MAX_RETRIES = 5
 
 _last_request_monotonic = 0.0
 
+# Unset until main.py calls set_user_agent(). fetch() fails fast if called
+# beforehand rather than silently sending a blank or stale header.
+_user_agent: str | None = None
+
+
+def set_user_agent(user_agent: str) -> None:
+    """Called once by the entry point after parsing --user-agent."""
+    global _user_agent
+    _user_agent = user_agent
+
+
+def _require_user_agent() -> str:
+    if not _user_agent:
+        raise RuntimeError(
+            "fetch() called before set_user_agent(). The entry point must "
+            "call set_user_agent(args.user_agent) before any network access."
+        )
+    return _user_agent
+
 
 def _cache_key(url: str) -> str:
-    """
-    Turn a URL into a filename that is safe and easy to recognize by eye.
-    Prefers the last segments of the URL path as a readable prefix, then appends a
-    hash to avoid collisions.
-    """
     parsed = urlparse(url)
     readable = parsed.path.strip("/").replace("/", "_") or "root"
     digest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:16]
@@ -65,7 +75,6 @@ def _cache_key(url: str) -> str:
 
 
 def _throttle() -> None:
-    """Ensure at least MIN_INTERVAL_SECONDS between two consecutive actual requests."""
     global _last_request_monotonic
     now = time.monotonic()
     elapsed = now - _last_request_monotonic
@@ -75,13 +84,9 @@ def _throttle() -> None:
 
 
 def _append_manifest(url: str, cache_key: str, cache_hit: bool) -> None:
-    """
-    Record the result of every fetch, used as evidence that:
-      (a) the second pipeline run produces a large number of cache_hit=true entries
-      (b) you actually exercised the throttle/retry logic, not hammered the API
-    This manifest can be opened directly during the Chapter 5 recording, or cited
-    as evidence in submission/ASSUMPTIONS.md.
-    """
+    """Records every fetch() call so cache-hit rate on a second run is
+    auditable, and so throttle/retry behavior can be verified after the
+    fact rather than taken on faith."""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     record = {
         "url": url,
@@ -94,20 +99,19 @@ def _append_manifest(url: str, cache_key: str, cache_hit: bool) -> None:
 
 
 def fetch(url: str, *, force_refresh: bool = False) -> bytes:
-    """
-    Fetch the raw bytes for a URL, with caching and throttling.
+    """Fetch a URL's raw bytes, with caching and throttling.
 
     Args:
-        url: the full URL.
-        force_refresh: if True, ignore any existing cache and force a fresh network
-                       request. Not for normal use -- only turn this on manually when
-                       you suspect the cache is stale.
+        url: full URL.
+        force_refresh: bypass the cache and re-fetch. Not used in normal
+            operation; only for manually invalidating a stale entry.
 
     Returns:
-        the raw bytes of the response for this URL.
+        Raw response bytes.
 
     Raises:
-        requests.HTTPError: if it still fails after MAX_RETRIES attempts.
+        RuntimeError: called before set_user_agent().
+        httpx.HTTPError: after MAX_RETRIES failed attempts.
     """
     key = _cache_key(url)
     cache_path = CACHE_DIR / key
@@ -117,18 +121,20 @@ def fetch(url: str, *, force_refresh: bool = False) -> bytes:
         logger.debug("cache hit: %s", url)
         return cache_path.read_bytes()
 
+    user_agent = _require_user_agent()
     backoff = INITIAL_BACKOFF_SECONDS
     last_exc: Exception | None = None
 
     for attempt in range(1, MAX_RETRIES + 1):
         _throttle()
         try:
-            resp = requests.get(
+            resp = httpx.get(
                 url,
-                headers={"User-Agent": USER_AGENT},
+                headers={"User-Agent": user_agent},
                 timeout=30,
+                follow_redirects=True,
             )
-        except requests.RequestException as exc:
+        except httpx.HTTPError as exc:
             last_exc = exc
             logger.warning("request failed (attempt %d/%d): %s — %s",
                             attempt, MAX_RETRIES, url, exc)
@@ -137,8 +143,6 @@ def fetch(url: str, *, force_refresh: bool = False) -> bytes:
             continue
 
         if resp.status_code == 429:
-            # rate-limited: back off instead of retrying immediately, so a temporary
-            # throttle doesn't turn into a permanent block.
             logger.warning(
                 "429 rate-limited (attempt %d/%d), backing off %.1fs: %s",
                 attempt, MAX_RETRIES, backoff, url,
@@ -155,14 +159,20 @@ def fetch(url: str, *, force_refresh: bool = False) -> bytes:
         logger.debug("fetched and cached: %s", url)
         return resp.content
 
-    raise requests.HTTPError(
+    raise httpx.HTTPError(
         f"Failed to fetch {url} after {MAX_RETRIES} attempts"
     ) from last_exc
 
 
 if __name__ == "__main__":
-    # quick self-test: fetch a small file to confirm the User-Agent/cache logic works.
+    import sys
+
     logging.basicConfig(level=logging.INFO)
+    if len(sys.argv) < 2:
+        print('Usage: python3 src/fetch.py "FirstName LastName netid@illinois.edu"')
+        sys.exit(1)
+
+    set_user_agent(sys.argv[1])
     test_url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany"
     print(f"Testing fetch() against {test_url}")
     data = fetch(test_url)
