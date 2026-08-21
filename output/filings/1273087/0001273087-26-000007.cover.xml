@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xmlns="http://www.sec.gov/edgar/thirteenffiler" xmlns:com="http://www.sec.gov/edgar/common">
+  <schemaVersion>X0202</schemaVersion>
+  <headerData>
+    <submissionType>13F-HR</submissionType>
+    <filerInfo>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <flags>
+        <confirmingCopyFlag>false</confirmingCopyFlag>
+        <returnCopyFlag>true</returnCopyFlag>
+        <overrideInternetFlag>false</overrideInternetFlag>
+      </flags>
+      <filer>
+        <credentials>
+          <cik>0001273087</cik>
+          <ccc>XXXXXXXX</ccc>
+        </credentials>
+      </filer>
+      <periodOfReport>06-30-2026</periodOfReport>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <coverPage>
+      <reportCalendarOrQuarter>06-30-2026</reportCalendarOrQuarter>
+      <filingManager>
+        <name>MILLENNIUM MANAGEMENT LLC</name>
+        <address>
+          <com:street1>399 PARK AVENUE</com:street1>
+          <com:city>NEW YORK</com:city>
+          <com:stateOrCountry>NY</com:stateOrCountry>
+          <com:zipCode>10022</com:zipCode>
+        </address>
+      </filingManager>
+      <reportType>13F COMBINATION REPORT</reportType>
+      <form13FFileNumber>028-10684</form13FFileNumber>
+      <otherManagersInfo>
+        <otherManager>
+          <cik>0001745981</cik>
+          <form13FFileNumber>028-18889</form13FFileNumber>
+          <name>WORLDQUANT MILLENNIUM ADVISORS LLC</name>
+        </otherManager>
+      </otherManagersInfo>
+      <provideInfoForInstruction5>Y</provideInfoForInstruction5>
+      <additionalInformation>Each of the holdings described below is held directly or indirectly by Millennium Partners, L.P. or one or more affiliated investment funds that invest a portion of their assets in Millennium Partners, L.P. The Other Included Managers Nos. 1 and 2 and the Other Manager Reporting for this Manager described herein are relying advisers (as defined under the SEC's Form ADV) of the Institutional Investment Manager filing this report (the "Institutional Investment Manager"). Certain holdings included in this report involve discretion exercised by other relying advisers of the Institutional Investment Manager that are not separately identified on this report. In addition, certain holdings included in this report are also reported in the holdings reports of other institutional investment managers that may be deemed to have shared investment discretion over such holdings, but on whose behalf the Institutional Investment Manager does not file holdings reports. For purposes of responding to Column 4 of the Information Table, values of all warrants that are 13(f) securities are valued based on the closing price of such warrants as of the quarter end.</additionalInformation>
+    </coverPage>
+    <signatureBlock>
+      <name>Gil Raviv</name>
+      <title>Global General Counsel</title>
+      <phone>212-841-4100</phone>
+      <signature>/s/ Gil Raviv</signature>
+      <city>New York</city>
+      <stateOrCountry>NY</stateOrCountry>
+      <signatureDate>08-14-2026</signatureDate>
+    </signatureBlock>
+    <summaryPage>
+      <otherIncludedManagersCount>2</otherIncludedManagersCount>
+      <tableEntryTotal>5798</tableEntryTotal>
+      <tableValueTotal>276293649404</tableValueTotal>
+      <isConfidentialOmitted>false</isConfidentialOmitted>
+      <otherManagers2Info>
+        <otherManager2>
+          <sequenceNumber>1</sequenceNumber>
+          <otherManager>
+            <cik>0001426821</cik>
+            <form13FFileNumber>028-12854</form13FFileNumber>
+            <name>MILLENNIUM INTERNATIONAL MANAGEMENT LP</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>2</sequenceNumber>
+          <otherManager>
+            <cik>0001426818</cik>
+            <form13FFileNumber>028-12858</form13FFileNumber>
+            <name>MILLENNIUM GLOBAL ESTATE GP LLC</name>
+          </otherManager>
+        </otherManager2>
+      </otherManagers2Info>
+    </summaryPage>
+  </formData>
+</edgarSubmission>

@@ -33,3 +33,4 @@ Thumbs.db
 # `git check-ignore -v output/holdings.parquet` if you are unsure whether yours does.
 !output/
 !output/**
+output/cik_lookup.csv

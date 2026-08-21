@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xmlns:ns1="http://www.sec.gov/edgar/common" xmlns="http://www.sec.gov/edgar/thirteenffiler">
+  <schemaVersion>X0202</schemaVersion>
+  <headerData>
+    <submissionType>13F-HR</submissionType>
+    <filerInfo>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <flags>
+        <confirmingCopyFlag>false</confirmingCopyFlag>
+        <returnCopyFlag>false</returnCopyFlag>
+        <overrideInternetFlag>false</overrideInternetFlag>
+      </flags>
+      <filer>
+        <credentials>
+          <cik>0001167557</cik>
+          <ccc>XXXXXXXX</ccc>
+        </credentials>
+      </filer>
+      <periodOfReport>06-30-2026</periodOfReport>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <coverPage>
+      <reportCalendarOrQuarter>06-30-2026</reportCalendarOrQuarter>
+      <isAmendment>false</isAmendment>
+      <filingManager>
+        <name>AQR CAPITAL MANAGEMENT LLC</name>
+        <address>
+          <ns1:street1>ONE GREENWICH PLAZA</ns1:street1>
+          <ns1:street2>SUITE 130</ns1:street2>
+          <ns1:city>Greenwich</ns1:city>
+          <ns1:stateOrCountry>CT</ns1:stateOrCountry>
+          <ns1:zipCode>06830</ns1:zipCode>
+        </address>
+      </filingManager>
+      <reportType>13F COMBINATION REPORT</reportType>
+      <form13FFileNumber>028-10120</form13FFileNumber>
+      <crdNumber>000111883</crdNumber>
+      <secFileNumber>801-55543</secFileNumber>
+      <otherManagersInfo>
+        <otherManager>
+          <cik>0001167456</cik>
+          <form13FFileNumber>028-10114</form13FFileNumber>
+          <crdNumber>000114626</crdNumber>
+          <secFileNumber>801-60678</secFileNumber>
+          <name>AQR Arbitrage LLC</name>
+        </otherManager>
+      </otherManagersInfo>
+      <provideInfoForInstruction5>N</provideInfoForInstruction5>
+    </coverPage>
+    <signatureBlock>
+      <name>Henry Parkin</name>
+      <title>Authorized Signatory</title>
+      <phone>203-742-3600</phone>
+      <signature>/s/ Henry Parkin</signature>
+      <city>Greenwich</city>
+      <stateOrCountry>CT</stateOrCountry>
+      <signatureDate>08-14-2026</signatureDate>
+    </signatureBlock>
+    <summaryPage>
+      <otherIncludedManagersCount>13</otherIncludedManagersCount>
+      <tableEntryTotal>21077</tableEntryTotal>
+      <tableValueTotal>286847511937</tableValueTotal>
+      <isConfidentialOmitted>false</isConfidentialOmitted>
+      <otherManagers2Info>
+        <otherManager2>
+          <sequenceNumber>1</sequenceNumber>
+          <otherManager>
+            <cik>0002004963</cik>
+            <form13FFileNumber>028-25055</form13FFileNumber>
+            <crdNumber>000324059</crdNumber>
+            <secFileNumber>801-126983</secFileNumber>
+            <name>Petros Family Wealth, LLC</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>2</sequenceNumber>
+          <otherManager>
+            <cik>0001903035</cik>
+            <form13FFileNumber>028-21639</form13FFileNumber>
+            <crdNumber>000117935</crdNumber>
+            <secFileNumber>801-62965</secFileNumber>
+            <name>KEB ASSET MANAGEMENT, LLC</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>3</sequenceNumber>
+          <otherManager>
+            <cik>0001633376</cik>
+            <form13FFileNumber>028-16752</form13FFileNumber>
+            <name>AQR Capital Management Holdings, LLC</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>4</sequenceNumber>
+          <otherManager>
+            <cik>0001965915</cik>
+            <form13FFileNumber>028-23086</form13FFileNumber>
+            <crdNumber>000140210</crdNumber>
+            <secFileNumber>801-66710</secFileNumber>
+            <name>RF&amp;L WEALTH MANAGEMENT, LLC</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>5</sequenceNumber>
+          <otherManager>
+            <cik>0002110534</cik>
+            <form13FFileNumber>028-26226</form13FFileNumber>
+            <crdNumber>000290485</crdNumber>
+            <secFileNumber>801-123514</secFileNumber>
+            <name>Prism Planning Partners LLC</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>6</sequenceNumber>
+          <otherManager>
+            <cik>0001978879</cik>
+            <form13FFileNumber>028-23288</form13FFileNumber>
+            <crdNumber>000171787</crdNumber>
+            <secFileNumber>801-126007</secFileNumber>
+            <name>Compound Planning, Inc.</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>7</sequenceNumber>
+          <otherManager>
+            <cik>0001904152</cik>
+            <form13FFileNumber>028-21455</form13FFileNumber>
+            <crdNumber>000124209</crdNumber>
+            <secFileNumber>801-61818</secFileNumber>
+            <name>DOPKINS WEALTH MANAGEMENT, LLC</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>8</sequenceNumber>
+          <otherManager>
+            <cik>0001586767</cik>
+            <form13FFileNumber>028-17856</form13FFileNumber>
+            <crdNumber>000133535</crdNumber>
+            <secFileNumber>801-67165</secFileNumber>
+            <name>Arax Advisory Partners</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>9</sequenceNumber>
+          <otherManager>
+            <cik>0001582681</cik>
+            <form13FFileNumber>028-20231</form13FFileNumber>
+            <name>Alaska Permanent Fund Corp</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>10</sequenceNumber>
+          <otherManager>
+            <cik>0001308668</cik>
+            <form13FFileNumber>028-10998</form13FFileNumber>
+            <crdNumber>000112319</crdNumber>
+            <secFileNumber>801-60303</secFileNumber>
+            <name>GuideStone Capital Management, LLC</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>11</sequenceNumber>
+          <otherManager>
+            <cik>0001484205</cik>
+            <form13FFileNumber>028-13854</form13FFileNumber>
+            <crdNumber>000105515</crdNumber>
+            <secFileNumber>801-33048</secFileNumber>
+            <name>HALBERT HARGROVE GLOBAL ADVISORS, LLC</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>12</sequenceNumber>
+          <otherManager>
+            <cik>0001802278</cik>
+            <form13FFileNumber>028-19806</form13FFileNumber>
+            <crdNumber>000300899</crdNumber>
+            <secFileNumber>801-115261</secFileNumber>
+            <name>Stokes Family Office, LLC</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>13</sequenceNumber>
+          <otherManager>
+            <cik>0001966440</cik>
+            <form13FFileNumber>028-23268</form13FFileNumber>
+            <crdNumber>000324308</crdNumber>
+            <secFileNumber>802-127935</secFileNumber>
+            <name>NATIONAL MUTUAL FUNDS MANAGEMENT LTD</name>
+          </otherManager>
+        </otherManager2>
+      </otherManagers2Info>
+    </summaryPage>
+  </formData>
+</edgarSubmission>

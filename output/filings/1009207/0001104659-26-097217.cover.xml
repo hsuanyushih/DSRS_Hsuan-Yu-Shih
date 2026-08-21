@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xsi:schemaLocation="http://www.sec.gov/edgar/thirteenffiler eis_13F_Filer.xsd" xmlns="http://www.sec.gov/edgar/thirteenffiler" xmlns:ns1="http://www.sec.gov/edgar/common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <schemaVersion>X0202</schemaVersion>
+  <headerData>
+    <submissionType>13F-HR</submissionType>
+    <filerInfo>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <flags>
+        <confirmingCopyFlag>false</confirmingCopyFlag>
+        <overrideInternetFlag>false</overrideInternetFlag>
+      </flags>
+      <filer>
+        <credentials>
+          <cik>0001009207</cik>
+          <ccc>XXXXXXXX</ccc>
+        </credentials>
+      </filer>
+      <periodOfReport>06-30-2026</periodOfReport>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <coverPage>
+      <reportCalendarOrQuarter>06-30-2026</reportCalendarOrQuarter>
+      <isAmendment>false</isAmendment>
+      <filingManager>
+        <name>D. E. Shaw &amp; Co., Inc.</name>
+        <address>
+          <ns1:street1>Two Manhattan West</ns1:street1>
+          <ns1:street2>375 Ninth Avenue, 52nd Floor</ns1:street2>
+          <ns1:city>New York</ns1:city>
+          <ns1:stateOrCountry>NY</ns1:stateOrCountry>
+          <ns1:zipCode>10001</ns1:zipCode>
+        </address>
+      </filingManager>
+      <reportType>13F HOLDINGS REPORT</reportType>
+      <form13FFileNumber>028-05396</form13FFileNumber>
+      <provideInfoForInstruction5>Y</provideInfoForInstruction5>
+      <additionalInformation>Daniel R. Marcus signs this Report as Attorney-in-Fact for David E. Shaw, President of D. E. Shaw &amp; Co., Inc. D. E. Shaw &amp; Co., Inc. may be deemed an institutional investment manager in its capacity as the general partner of D. E. Shaw &amp; Co., L.P., which in turn is the managing member of certain other affiliated institutional investment managers. D. E. Shaw &amp; Co., Inc. does not exercise investment or voting discretion, and therefore disclaims such discretion, with respect to Section 13(f) securities. D. E. Shaw &amp; Co., L.P. may be deemed to exercise investment or voting discretion for affiliated institutional investment managers. D. E. Shaw &amp; Co., L.P. does not exercise investment or voting discretion, and therefore disclaims such discretion, with respect to Section 13(f) securities over which such affiliated institutional investment managers exercise investment or voting discretion.</additionalInformation>
+    </coverPage>
+    <signatureBlock>
+      <name>Daniel R. Marcus</name>
+      <title>See Additional Information</title>
+      <phone>212-478-0000</phone>
+      <signature>/s/ Daniel R. Marcus</signature>
+      <city>New York</city>
+      <stateOrCountry>NY</stateOrCountry>
+      <signatureDate>08-14-2026</signatureDate>
+    </signatureBlock>
+    <summaryPage>
+      <otherIncludedManagersCount>6</otherIncludedManagersCount>
+      <tableEntryTotal>6298</tableEntryTotal>
+      <tableValueTotal>210202510998</tableValueTotal>
+      <otherManagers2Info>
+        <otherManager2>
+          <sequenceNumber>1</sequenceNumber>
+          <otherManager>
+            <cik>0001009268</cik>
+            <form13FFileNumber>028-05394</form13FFileNumber>
+            <crdNumber>000108679</crdNumber>
+            <secFileNumber>801-56171</secFileNumber>
+            <name>D. E. SHAW &amp; CO, L.P.</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>2</sequenceNumber>
+          <otherManager>
+            <cik>0001335794</cik>
+            <form13FFileNumber>028-11452</form13FFileNumber>
+            <crdNumber>000135284</crdNumber>
+            <secFileNumber>801-64222</secFileNumber>
+            <name>D. E. Shaw Investment Management, L.L.C.</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>3</sequenceNumber>
+          <otherManager>
+            <cik>0001518837</cik>
+            <form13FFileNumber>028-14492</form13FFileNumber>
+            <crdNumber>000295202</crdNumber>
+            <name>D. E. Shaw Heliant Adviser, L.L.C.</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>4</sequenceNumber>
+          <otherManager>
+            <cik>0001569653</cik>
+            <form13FFileNumber>028-15385</form13FFileNumber>
+            <crdNumber>000294586</crdNumber>
+            <name>D. E. Shaw Adviser II, L.L.C.</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>5</sequenceNumber>
+          <otherManager>
+            <cik>0002111384</cik>
+            <form13FFileNumber>028-26546</form13FFileNumber>
+            <crdNumber>000294595</crdNumber>
+            <name>D. E. Shaw Composite Adviser, L.L.C.</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>6</sequenceNumber>
+          <otherManager>
+            <cik>0002111385</cik>
+            <form13FFileNumber>028-26545</form13FFileNumber>
+            <crdNumber>000294600</crdNumber>
+            <name>D. E. Shaw Multi-Asset Adviser, L.L.C.</name>
+          </otherManager>
+        </otherManager2>
+      </otherManagers2Info>
+    </summaryPage>
+  </formData>
+</edgarSubmission>

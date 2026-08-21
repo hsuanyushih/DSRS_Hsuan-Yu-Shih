@@ -1,25 +1,27 @@
-"""
-cik_verify.py -- verify the CIKs in filers.csv and write output/filers.csv.
+"""cik_verify.py
 
-Process:
-    1. Download the official SEC CIK lookup table (cik-lookup-data.txt) and save it
-       as a local CSV. This happens once; later runs reuse the local file.
-    2. Build a lookup index: normalized core name -> [(original name, cik), ...]
-    3. Reconcile each row in filers.csv:
-         - given CIK is among the candidates -> cik_source = "given"
-         - given CIK is not a candidate, but the core name has one candidate
-           -> cik_source = "corrected"
-         - no candidates or multiple candidates -> log it for manual review
-    4. Write output/filers.csv sorted by ascending CIK.
+Verifies the CIKs in filers.csv against SEC's official name->CIK lookup
+file and writes output/filers.csv.
 
-Usage (always run from the project root):
+Pipeline:
+    1. Download SEC's CIK lookup file (cik-lookup-data.txt) once and cache
+       it locally as CSV.
+    2. Build a lookup index: normalized "core" company name -> list of
+       (original SEC name, CIK) candidates.
+    3. Reconcile each row in filers.csv against that index:
+         - given CIK matches a candidate       -> cik_source = "given"
+         - given CIK doesn't match, but exactly
+           one candidate exists                -> cik_source = "corrected"
+         - zero or multiple candidates          -> flagged for manual review
+    4. Write output/filers.csv, sorted by CIK ascending.
+
+Run (always from the repo root):
     python3 src/cik_verify.py
 """
 
 from __future__ import annotations
 
 import csv
-import json
 import logging
 import re
 import sys
@@ -30,36 +32,35 @@ from fetch import fetch
 logger = logging.getLogger(__name__)
 
 CIK_LOOKUP_URL = "https://www.sec.gov/Archives/edgar/cik-lookup-data.txt"
-# cik-lookup-data.txt is only a static name lookup; one name may map to several real CIKs.
-# Use the live API below to determine which CIK actually files 13F reports.
-SUBMISSIONS_URL_TMPL = "https://data.sec.gov/submissions/CIK{cik}.json"
 LOOKUP_CSV_PATH = Path("output/cik_lookup.csv")
-FILERS_INPUT_PATH = Path("filers.csv")          # original roster
-FILERS_OUTPUT_PATH = Path("output/filers.csv")   # chapter output
+FILERS_INPUT_PATH = Path("filers.csv")
+FILERS_OUTPUT_PATH = Path("output/filers.csv")
 
-# Common legal suffixes. Matching uses the core name without these suffixes.
+# Common legal suffixes. The "core" name used for matching excludes these;
+# the suffix is compared separately.
 SUFFIX_WORDS = {"LLC", "LP", "LLP", "INC", "CORP", "CO", "LTD", "PLC"}
 
-# Common formatting quirks in the SEC lookup table:
-#   1. A "/state abbreviation" disambiguates companies with the same name, e.g.
+# Known quirks in SEC's lookup file / our own roster:
+#   1. A trailing "/XX" state-abbreviation disambiguator, e.g.
 #      "BAUPOST GROUP LLC/MA".
-#   2. Our roster occasionally contains parenthetical notes, e.g.
-#      "DME Capital Management LP (Greenlight)". These are human-facing notes,
-#      not part of the legal name, so remove them before matching.
+#   2. Parenthetical annotations in the roster that aren't part of the
+#      legal name, e.g. "DME Capital Management LP (Greenlight)".
 STATE_SUFFIX_RE = re.compile(r"/[A-Z]{2}$")
 PAREN_RE = re.compile(r"\([^)]*\)")
-# SEC uses "ET AL" to indicate that a CIK files for an affiliated group,
-# e.g. "TUDOR INVESTMENT CORP ET AL". It is not part of the company name.
+# SEC uses "ET AL" to mark a CIK that reports on behalf of an affiliated
+# group, e.g. "TUDOR INVESTMENT CORP ET AL" -- not part of the entity name.
 ET_AL_RE = re.compile(r"\bET AL\b")
 
+
 # ---------------------------------------------------------------------------
-# Step 1: download and parse the official CIK lookup table
+# Step 1: download and parse the official CIK lookup file
 # ---------------------------------------------------------------------------
 
 def download_and_cache_lookup() -> Path:
     """
-    Download cik-lookup-data.txt through fetch() and parse it into
-    output/cik_lookup.csv. If the CSV already exists, skip parsing to speed up reruns.
+    Download cik-lookup-data.txt (via fetch(), which caches on its own)
+    and parse it into output/cik_lookup.csv. If that CSV already exists,
+    skip re-parsing to speed up repeat runs.
     """
     if LOOKUP_CSV_PATH.exists():
         logger.info("cik_lookup.csv already exists, skipping re-parse: %s",
@@ -68,7 +69,7 @@ def download_and_cache_lookup() -> Path:
 
     logger.info("Fetching CIK lookup file from SEC...")
     raw = fetch(CIK_LOOKUP_URL)
-    text = raw.decode("latin-1")  # SEC's file is not UTF-8; latin-1 avoids decode errors
+    text = raw.decode("latin-1")  # not UTF-8; latin-1 avoids decode errors
 
     LOOKUP_CSV_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(LOOKUP_CSV_PATH, "w", newline="", encoding="utf-8") as f:
@@ -94,16 +95,16 @@ def download_and_cache_lookup() -> Path:
 
 
 # ---------------------------------------------------------------------------
-# Step 2: name normalization and layered matching
+# Step 2: name normalization + tiered matching
 # ---------------------------------------------------------------------------
 
 def strip_punctuation(name: str) -> str:
     n = name.upper().strip()
-    n = STATE_SUFFIX_RE.sub("", n)   # remove SEC disambiguation suffixes such as "/MA"
-    n = PAREN_RE.sub("", n)          # remove parenthetical notes such as "(Greenlight)"
-    n = ET_AL_RE.sub("", n)          # remove the group-filing marker "ET AL"
+    n = STATE_SUFFIX_RE.sub("", n)
+    n = PAREN_RE.sub("", n)
+    n = ET_AL_RE.sub("", n)
     n = n.replace("&", "AND")
-    n = re.sub(r"[^\w\s]", "", n)    # remove punctuation, preserve letters/numbers/spaces
+    n = re.sub(r"[^\w\s]", "", n)
     n = re.sub(r"\s+", " ", n).strip()
     return n
 
@@ -111,8 +112,8 @@ def strip_punctuation(name: str) -> str:
 def split_core_and_suffix(name: str) -> tuple[str, str | None]:
     """
     'Balyasny Asset Management L.P.' -> ('BALYASNY ASSET MANAGEMENT', 'LP')
-    'The Baupost Group LLC' -> ('BAUPOST GROUP', 'LLC')  # leading THE is not part of the core
-    If no known suffix is found, suffix is None and core is the full normalized name.
+    'The Baupost Group LLC' -> ('BAUPOST GROUP', 'LLC')  # leading "THE" excluded
+    Returns (name, None) if no recognized suffix is found.
     """
     tokens = strip_punctuation(name).split(" ")
     if tokens and tokens[0] == "THE":
@@ -121,37 +122,12 @@ def split_core_and_suffix(name: str) -> tuple[str, str | None]:
         return " ".join(tokens[:-1]), tokens[-1]
     return " ".join(tokens), None
 
-def fetch_filer_summary(cik: str) -> dict | None:
-    """
-    Query the live SEC submissions API and return this CIK's registered name plus
-    its 13F-HR filing count/date range. This is practical evidence for choosing the
-    correct candidate CIK instead of relying only on static lookup text.
-    """
-    url = SUBMISSIONS_URL_TMPL.format(cik=cik)
-    try:
-        raw = fetch(url)
-    except Exception as exc:
-        logger.warning("Failed to query %s: %s", url, exc)
-        return None
-
-    data = json.loads(raw)
-    recent = data.get("filings", {}).get("recent", {})
-    forms = recent.get("form", [])
-    dates = recent.get("filingDate", [])
-    thirteen_f_dates = [d for f, d in zip(forms, dates) if f.startswith("13F")]
-
-    return {
-        "name": data.get("name"),
-        "thirteen_f_count": len(thirteen_f_dates),
-        "thirteen_f_earliest": min(thirteen_f_dates, default=None),
-        "thirteen_f_latest": max(thirteen_f_dates, default=None),
-    }
-
 
 def build_core_index(lookup_csv: Path) -> dict[str, list[tuple[str, str]]]:
     """
-    Read output/cik_lookup.csv and build a core_name -> [(original SEC name, cik)] index.
-    The index may be large, so build it once as a dict for O(1) lookups later.
+    Build core_name -> [(original SEC name, CIK), ...] from
+    output/cik_lookup.csv. Built once as a dict for O(1) lookups against
+    a multi-million-row source file.
     """
     index: dict[str, list[tuple[str, str]]] = {}
     with open(lookup_csv, encoding="utf-8") as f:
@@ -167,10 +143,27 @@ def build_core_index(lookup_csv: Path) -> dict[str, list[tuple[str, str]]]:
 # Step 3: reconcile each roster row
 # ---------------------------------------------------------------------------
 
+# Manually verified overrides for cases where the name-matching logic
+# surfaces multiple candidates and automatic disambiguation is not safe.
+# Each entry was resolved by checking real 13F-HR filing activity via the
+# SEC submissions API, not by name-matching alone. Evidence is documented
+# in submission/ASSUMPTIONS.md.
+#
+# Tudor Investment Corp: the roster's given CIK (854157) resolves to
+# STATE OF WISCONSIN INVESTMENT BOARD, an unrelated filer with its own
+# 103 13F-HR filings. The correct entity is CIK 923093 (TUDOR INVESTMENT
+# CORP ET AL), confirmed via 116 13F-HR filings spanning 1999-2026. The
+# other candidate, CIK 1080384 (TUDOR INVESTMENT CORP, no "ET AL"), has
+# zero 13F-HR filings on record.
+MANUAL_CIK_OVERRIDES = {
+    "0000854157": "0000923093",
+}
+
+
 def reconcile(filers_path: Path, core_index: dict) -> list[dict]:
     """
-    Find matching core-name candidates for each filers.csv row, determine cik_source,
-    and separately mark uncertain cases for manual review.
+    Match each row in filers.csv against the SEC lookup index, decide
+    cik_source, and flag ambiguous cases for manual review.
     """
     results = []
     needs_review = []
@@ -180,6 +173,16 @@ def reconcile(filers_path: Path, core_index: dict) -> list[dict]:
             fund_name = row["fund_name"].strip()
             given_cik = row["cik"].strip().zfill(10)
 
+            if given_cik in MANUAL_CIK_OVERRIDES:
+                final_cik = MANUAL_CIK_OVERRIDES[given_cik]
+                cik_source = "corrected"
+                results.append({
+                    "fund_name": fund_name,
+                    "cik": final_cik.lstrip("0") or "0",
+                    "cik_source": cik_source,
+                })
+                continue
+
             core, suffix = split_core_and_suffix(fund_name)
             candidates = core_index.get(core, [])
             candidate_ciks = {cik for _name, cik in candidates}
@@ -188,11 +191,13 @@ def reconcile(filers_path: Path, core_index: dict) -> list[dict]:
                 cik_source = "given"
                 final_cik = given_cik
             elif len(candidate_ciks) == 1:
-                # The core name maps to one CIK, and it differs from the given value.
+                # Unique candidate under the normalized core name, and it
+                # differs from what was given -> correct it.
                 final_cik = next(iter(candidate_ciks))
                 cik_source = "corrected"
             else:
-                # Zero or multiple candidates are not reliable for automatic resolution.
+                # Zero or multiple candidates: automatic disambiguation is
+                # unreliable here, flag for manual review instead of guessing.
                 final_cik = given_cik
                 cik_source = "NEEDS_REVIEW"
                 needs_review.append({
@@ -204,13 +209,13 @@ def reconcile(filers_path: Path, core_index: dict) -> list[dict]:
 
             results.append({
                 "fund_name": fund_name,
-                "cik": final_cik.lstrip("0") or "0",  # output without leading zeros per Chapter 1
+                "cik": final_cik.lstrip("0") or "0",
                 "cik_source": cik_source,
             })
 
     if needs_review:
         logger.warning(
-            "%d row(s) need manual review (candidate count != 1); querying the SEC submissions API for evidence:",
+            "%d row(s) need manual review (candidate count != 1):",
             len(needs_review),
         )
         for item in needs_review:
@@ -219,28 +224,15 @@ def reconcile(filers_path: Path, core_index: dict) -> list[dict]:
                 item["fund_name"], item["given_cik"], item["core"],
                 item["candidates"],
             )
-            # Also check the given CIK because it may not be in the candidate list.
-            ciks_to_check = {cik for _name, cik in item["candidates"]}
-            ciks_to_check.add(item["given_cik"])
-            for cik in sorted(ciks_to_check):
-                summary = fetch_filer_summary(cik)
-                if summary is None:
-                    continue
-                logger.warning(
-                    "    CIK %s -> name=%r, %d 13F-HR filing(s) (%s ~ %s)",
-                    cik, summary["name"], summary["thirteen_f_count"],
-                    summary["thirteen_f_earliest"], summary["thirteen_f_latest"],
-                )
 
     return results
 
 
 # ---------------------------------------------------------------------------
-# Step 4: output
+# Step 4: write output
 # ---------------------------------------------------------------------------
 
 def write_output(results: list[dict], out_path: Path) -> None:
-    # Sort CIKs in ascending order as required by the specification.
     results_sorted = sorted(results, key=lambda r: int(r["cik"]))
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", newline="", encoding="utf-8") as f:
@@ -260,7 +252,7 @@ def main() -> int:
 
     if not FILERS_INPUT_PATH.exists():
         logger.error(
-            "Cannot find %s -- place the original filers.csv in the project root and run again.",
+            "%s not found -- place the roster CSV at the repo root before running.",
             FILERS_INPUT_PATH,
         )
         return 1
@@ -272,9 +264,9 @@ def main() -> int:
     review_count = sum(1 for r in results if r["cik_source"] == "NEEDS_REVIEW")
     if review_count:
         logger.warning(
-            "%d row(s) are marked NEEDS_REVIEW; this is not a final answer -- "
-            "manually verify them, change each to given or corrected, and document "
-            "your reasoning in submission/ASSUMPTIONS.md.",
+            "%d row(s) still marked NEEDS_REVIEW -- this is not a final "
+            "answer. Verify manually, add a MANUAL_CIK_OVERRIDES entry, "
+            "and document the evidence in submission/ASSUMPTIONS.md.",
             review_count,
         )
 

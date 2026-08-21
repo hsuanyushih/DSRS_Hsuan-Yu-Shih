@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xmlns:ns1="http://www.sec.gov/edgar/common" xmlns="http://www.sec.gov/edgar/thirteenffiler">
+  <schemaVersion>X0202</schemaVersion>
+  <headerData>
+    <submissionType>13F-HR</submissionType>
+    <filerInfo>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <flags>
+        <confirmingCopyFlag>false</confirmingCopyFlag>
+        <returnCopyFlag>false</returnCopyFlag>
+        <overrideInternetFlag>false</overrideInternetFlag>
+      </flags>
+      <filer>
+        <credentials>
+          <cik>0001637460</cik>
+          <ccc>XXXXXXXX</ccc>
+        </credentials>
+      </filer>
+      <periodOfReport>06-30-2026</periodOfReport>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <coverPage>
+      <reportCalendarOrQuarter>06-30-2026</reportCalendarOrQuarter>
+      <isAmendment>false</isAmendment>
+      <filingManager>
+        <name>Man Group plc</name>
+        <address>
+          <ns1:street1>RIVERBANK HOUSE, 2 SWAN LANE</ns1:street1>
+          <ns1:city>LONDON</ns1:city>
+          <ns1:stateOrCountry>X0</ns1:stateOrCountry>
+          <ns1:zipCode>EC4R 3AD</ns1:zipCode>
+        </address>
+      </filingManager>
+      <reportType>13F COMBINATION REPORT</reportType>
+      <form13FFileNumber>028-18778</form13FFileNumber>
+      <otherManagersInfo>
+        <otherManager>
+          <cik>0001692234</cik>
+          <form13FFileNumber>028-17598</form13FFileNumber>
+          <name>Russell Investments Group, Ltd.</name>
+        </otherManager>
+        <otherManager>
+          <cik>0002080520</cik>
+          <form13FFileNumber>028-25693</form13FFileNumber>
+          <name>ABN AMRO Investment Solutions</name>
+        </otherManager>
+      </otherManagersInfo>
+      <provideInfoForInstruction5>Y</provideInfoForInstruction5>
+      <additionalInformation>Man Group plc, which is the institutional investment manager filing this Form 13F, is the parent company which indirectly, through various intermediate entities, controls the Other Included Managers that exercise investment discretion over Section 13(f) securities.  Based on this corporate structure, Man Group plc is deemed to have shared investment discretion over the Section 13(f) positions of each of the Other Included Managers.</additionalInformation>
+    </coverPage>
+    <signatureBlock>
+      <name>Katherine Elizabeth Squire</name>
+      <title>Chief Administrative Officer</title>
+      <phone>44-207-144-1000</phone>
+      <signature>/s/ Katherine Elizabeth Squire</signature>
+      <city>London</city>
+      <stateOrCountry>X0</stateOrCountry>
+      <signatureDate>08-14-2026</signatureDate>
+    </signatureBlock>
+    <summaryPage>
+      <otherIncludedManagersCount>5</otherIncludedManagersCount>
+      <tableEntryTotal>3650</tableEntryTotal>
+      <tableValueTotal>62701561678</tableValueTotal>
+      <isConfidentialOmitted>false</isConfidentialOmitted>
+      <otherManagers2Info>
+        <otherManager2>
+          <sequenceNumber>5</sequenceNumber>
+          <otherManager>
+            <cik>0002009602</cik>
+            <form13FFileNumber>028-23919</form13FFileNumber>
+            <crdNumber>000313907</crdNumber>
+            <secFileNumber>801-121284</secFileNumber>
+            <name>Man Investments Australia Ltd</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>1</sequenceNumber>
+          <otherManager>
+            <cik>0001598894</cik>
+            <form13FFileNumber>028-16037</form13FFileNumber>
+            <crdNumber>000167882</crdNumber>
+            <secFileNumber>801-79565</secFileNumber>
+            <name>AHL Partners LLP</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>2</sequenceNumber>
+          <otherManager>
+            <cik>0001352261</cik>
+            <form13FFileNumber>028-11672</form13FFileNumber>
+            <crdNumber>000138802</crdNumber>
+            <secFileNumber>801-65571</secFileNumber>
+            <name>GLG LLC</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>3</sequenceNumber>
+          <otherManager>
+            <cik>0001289643</cik>
+            <form13FFileNumber>028-10979</form13FFileNumber>
+            <crdNumber>000163016</crdNumber>
+            <secFileNumber>801-78835</secFileNumber>
+            <name>GLG Partners LP</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>4</sequenceNumber>
+          <otherManager>
+            <cik>0001365324</cik>
+            <form13FFileNumber>028-11946</form13FFileNumber>
+            <crdNumber>000131684</crdNumber>
+            <secFileNumber>801-63276</secFileNumber>
+            <name>Numeric Investors LLC</name>
+          </otherManager>
+        </otherManager2>
+      </otherManagers2Info>
+    </summaryPage>
+  </formData>
+</edgarSubmission>

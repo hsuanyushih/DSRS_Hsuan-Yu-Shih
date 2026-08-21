@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xsi:schemaLocation="http://www.sec.gov/edgar/thirteenffiler eis_13F_Filer.xsd" xmlns:ns1="http://www.sec.gov/edgar/common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.sec.gov/edgar/thirteenffiler">
+  <schemaVersion>X0202</schemaVersion>
+  <headerData>
+    <submissionType>13F-HR</submissionType>
+    <filerInfo>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <flags/>
+      <filer>
+        <credentials>
+          <cik>0001218710</cik>
+          <ccc>XXXXXXXX</ccc>
+        </credentials>
+      </filer>
+      <periodOfReport>03-31-2026</periodOfReport>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <coverPage>
+      <reportCalendarOrQuarter>03-31-2026</reportCalendarOrQuarter>
+      <isAmendment>false</isAmendment>
+      <filingManager>
+        <name>Balyasny Asset Management L.P.</name>
+        <address>
+          <ns1:street1>444 West Lake Street 50th Floor</ns1:street1>
+          <ns1:city>Chicago</ns1:city>
+          <ns1:stateOrCountry>IL</ns1:stateOrCountry>
+          <ns1:zipCode>60606</ns1:zipCode>
+        </address>
+      </filingManager>
+      <reportType>13F COMBINATION REPORT</reportType>
+      <form13FFileNumber>028-10402</form13FFileNumber>
+      <crdNumber>000138111</crdNumber>
+      <secFileNumber>801-66002</secFileNumber>
+      <otherManagersInfo>
+        <otherManager>
+          <crdNumber>000334726</crdNumber>
+          <name>Longaeva Partners L.P.</name>
+        </otherManager>
+      </otherManagersInfo>
+      <provideInfoForInstruction5>N</provideInfoForInstruction5>
+    </coverPage>
+    <signatureBlock>
+      <name>Scott Schroeder</name>
+      <title>Partner</title>
+      <phone>312-499-2999</phone>
+      <signature>Scott Schroeder</signature>
+      <city>Chicago</city>
+      <stateOrCountry>IL</stateOrCountry>
+      <signatureDate>05-14-2026</signatureDate>
+    </signatureBlock>
+    <summaryPage>
+      <otherIncludedManagersCount>0</otherIncludedManagersCount>
+      <tableEntryTotal>3117</tableEntryTotal>
+      <tableValueTotal>77093441351</tableValueTotal>
+      <isConfidentialOmitted>false</isConfidentialOmitted>
+    </summaryPage>
+  </formData>
+</edgarSubmission>

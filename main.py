@@ -3,20 +3,28 @@
 
     python main.py --user-agent "FirstName LastName netid@illinois.edu"
 
-This is how we run your submission, so it must work from a clean checkout with nothing
-in output/. Everything below is yours to rewrite — add modules, packages, classes,
-whatever fits. Only two things are fixed:
+Entry point called by the grader. Must work from a clean checkout with
+nothing in output/. Runs, in order:
 
-  - this file is the entry point, and it accepts --user-agent
-  - it writes output/filings.parquet and output/holdings.parquet
+    1. cik_verify       verify/correct the 20 CIKs against SEC's lookup file
+    2. discover_filings find the in-scope 13F filings via the submissions API
+    3. download_filings fetch and cache the filing XML
+    4. parse_filings    parse into filings.parquet / holdings.parquet
 
-Start with docs/01-source.md. Check your output with `python verify.py`.
+Each step writes intermediate output/ artifacts consumed by the next step;
+each step's main() returns 0 on success, non-zero on failure. The pipeline
+aborts on the first failing step rather than continuing on a broken input.
+
+Known limitation: all four steps currently write to hardcoded output/*
+paths rather than honoring --output. This assumes the grader runs from the
+repo root, which matches "must work from a clean checkout" in the README.
+Documented in submission/ASSUMPTIONS.md.
 """
 
 from __future__ import annotations
 
 import argparse
-import csv
+import logging
 import re
 import sys
 from pathlib import Path
@@ -24,39 +32,38 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 FILERS = ROOT / "filers.csv"
 OUTPUT = ROOT / "output"
+SRC = ROOT / "src"
 
-# Scope. See docs/01-source.md — filter report periods on reportDate, and exclude
-# anything accepted after the cutoff.
-REPORT_PERIODS = ("2026-03-31", "2026-06-30")
-FILING_DATE_CUTOFF = "2026-08-18"  # inclusive
-
-# SEC rejects requests without a contact address, and a run that gets the department
-# blocked is worth failing fast on. Loose on purpose: we check an address is present,
-# not that it is well-formed.
+# SEC rejects requests without a contact address, and a run that gets the
+# department blocked is worth failing fast on. Loose on purpose: checks an
+# address is present, not that it is well-formed.
 UA_PATTERN = re.compile(r"^\S.*\s+[^@\s]+@[^@\s]+\.[a-z]{2,}\s*$", re.I)
 
 
-def load_filers() -> list[dict[str, str]]:
-    """The roster the researcher supplied. At least one CIK in here is wrong."""
-    with FILERS.open(newline="") as fh:
-        return list(csv.DictReader(fh))
-
-
 def run(user_agent: str, output: Path) -> None:
-    """Build the dataset.
+    """Build the dataset by running each chapter's script in sequence."""
+    sys.path.insert(0, str(SRC))
 
-    Suggested shape, not a requirement:
+    from fetch import set_user_agent
+    set_user_agent(user_agent)
 
-        1. verify the CIKs against SEC's lookup file      docs/01-source.md
-        2. find in-scope filings via the submissions API
-        3. download the filings, caching as you go
-        4. parse into the schema                          docs/SCHEMA.md
-        5. write output/filings.parquet and output/holdings.parquet
-    """
-    raise NotImplementedError(
-        "Implement your pipeline here. Start with docs/01-source.md, then "
-        "docs/SCHEMA.md for the output contract."
-    )
+    import cik_verify
+    import discover_filings
+    import download_filings
+    import parse_filings
+
+    steps = [
+        ("CIK verification", cik_verify.main),
+        ("Filing discovery", discover_filings.main),
+        ("Filing download", download_filings.main),
+        ("Parse to Parquet", parse_filings.main),
+    ]
+
+    for label, step in steps:
+        logging.info("=== %s ===", label)
+        exit_code = step()
+        if exit_code != 0:
+            sys.exit(f"{label} failed (exit code {exit_code}); aborting pipeline.")
 
 
 def main() -> int:
@@ -73,6 +80,8 @@ def main() -> int:
             "SEC requires a contact address and rejects requests without one.\n"
             '  python main.py --user-agent "Jane Doe jdoe@illinois.edu"'
         )
+
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
     args.output.mkdir(parents=True, exist_ok=True)
     run(args.user_agent, args.output)
