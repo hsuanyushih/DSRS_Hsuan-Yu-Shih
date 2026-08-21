@@ -1,0 +1,31 @@
+# FROZEN. Modifications are detected and this version is restored before grading.
+#
+# Layered on purpose: this file owns the runtime, the pinned dependencies, and the
+# files we supply. Yours (Dockerfile) builds FROM it and adds only what you need, so
+# your image cannot drift from the one we grade in.
+
+FROM python:3.12-slim AS base
+
+# Non-root. Candidate code runs at grading time with a live model credential in the
+# environment.
+RUN useradd --create-home --uid 10001 runner
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+WORKDIR /app
+
+# Dependencies first, so editing source does not invalidate the layer.
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# Files we supply. Restored over your copies at grading time regardless.
+COPY verify.py check_submission.py filers.csv /app/
+COPY agents/llm.py /app/agents/llm.py
+
+# Writable only where output and cache belong.
+RUN mkdir -p /app/output /app/.cache && chown -R runner:runner /app/output /app/.cache
+
+USER runner

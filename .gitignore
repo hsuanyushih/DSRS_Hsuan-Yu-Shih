@@ -1,0 +1,35 @@
+# Local environment -- never commit credentials.
+.env
+.env.*
+!.env.example
+
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Your EDGAR response cache. Large, regenerable, and not part of the submission.
+.cache/
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---------------------------------------------------------------------------
+# output/ IS the submission. Commit it.
+#
+# Force-tracked below in case a global gitignore excludes data files -- run
+# `git check-ignore -v output/holdings.parquet` if you are unsure whether yours does.
+!output/
+!output/**

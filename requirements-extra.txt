@@ -1,0 +1,5 @@
+# Yours. One dependency per line, pinned to an exact version.
+# Justify each one in submission/DEPENDENCIES.md.
+#
+# The ingestion pipeline is graded on your parsing, so libraries that wrap 13F
+# retrieval and parsing end to end will not, on their own, satisfy the schema.
