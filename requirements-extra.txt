@@ -3,3 +3,4 @@
 #
 # The ingestion pipeline is graded on your parsing, so libraries that wrap 13F
 # retrieval and parsing end to end will not, on their own, satisfy the schema.
+pandas==3.0.1
