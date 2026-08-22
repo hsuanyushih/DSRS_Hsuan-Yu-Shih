@@ -1,22 +1,16 @@
 # Dependencies
 
-Every library you added to `requirements-extra.txt`, with a one-line reason.
+Additions to `requirements-extra.txt`, beyond what's already pinned in the
+frozen `requirements.txt`.
 
-We are not counting libraries — a well-chosen dependency is better engineering than a
-hand-rolled version of the same thing. What we are reading is whether you added each
-one deliberately.
-
-| Library | Version | Why |
+| Package | Version | Why |
 |---|---|---|
-| *example* | *2.1.0* | *replace this row* |
+| `pandas` | `3.0.1` | Used in `agents/data.py` and `agents/executor.py` for all read-only filtering, grouping, and aggregation over the two Parquet tables (`filings.parquet`, `holdings.parquet`) that back Chapter 4's agent. `pyarrow` (already in `requirements.txt`) is used to read the Parquet files into memory, but the actual query logic -- filtering by quarter/manager/issuer, grouping and summing, computing deltas between quarters -- is written against a `pandas.DataFrame`, not raw Arrow tables. No SQL, `eval`, or dynamically constructed query strings are used anywhere; every operation in `executor.py` is a whitelisted-field pandas filter/groupby/sort call built entirely from validated `QueryPlan` fields (see `submission/ASSUMPTIONS.md`). |
 
-## Anything you considered and rejected
-
-Optional, but the more interesting half. A library you looked at and decided against —
-and why — says more than the ones you kept.
-
-## Note
-
-Libraries that wrap 13F retrieval and parsing end to end will not, on their own,
-satisfy the schema or the quality report, and we will ask you to explain the edge cases
-in your output regardless of how you produced it. If you can explain it, you own it.
+No other third-party packages were added. Everything else imported across
+`src/`, `agents/`, and `submission/eda.py` is either already pinned in the
+frozen `requirements.txt` (`httpx`, `pyarrow`, `openai`, `python-dotenv`) or
+part of the Python standard library (`csv`, `re`, `json`, `logging`,
+`hashlib`, `time`, `functools`, `difflib`, `datetime`, `pathlib`, `typing`,
+`dataclasses`, `urllib.parse`, `xml.etree.ElementTree`, `collections`, `sys`,
+`os`).
