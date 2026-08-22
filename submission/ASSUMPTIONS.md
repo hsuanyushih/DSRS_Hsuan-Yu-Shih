@@ -1,9 +1,5 @@
 # Assumptions
 
-This document records decisions made where the spec was ambiguous, or where a
-judgment call was required and the reasoning is worth preserving.
-
----
 
 ## Chapter 1 · Source
 
@@ -127,6 +123,37 @@ to defects in `planner.py` or `executor.py`:
 independent of answer correctness: exactly one LLM call per question (no retry
 loops), and full null-answer handling with no crashes across all 10 example
 questions, including the intentionally out-of-scope one (2026 Q3).
+
+### A real bug found and fixed via local testing: degenerate group_by/metric combinations
+
+Local testing surfaced a genuine logic error, independent of model size: for
+"How many distinct issuers did Renaissance Technologies LLC report in 2026
+Q2?", `llama3.2:3b` correctly resolved the manager and metric
+(`metric="distinct_issuers"`) but set `group_by="issuer"` -- semantically
+wrong for a single-manager question with no comparison, but a value the
+schema otherwise permits.
+
+`executor.py`'s grouped-metric path silently computed a valid-looking but
+meaningless answer from that combination: grouping by `name_of_issuer` and
+then counting `nunique()` of `name_of_issuer` within each group is
+degenerate -- every group contains only itself, so the answer is always `1`,
+regardless of the manager's true holdings. The agent returned
+`{"answer": 1, "unit": "COUNT", ...}` with a valid-looking accession as its
+source. The true answer, computed directly against `holdings.parquet`, is
+`2898`. This is exactly the "confident but wrong" failure mode `04-serve.md`
+singles out as having no upside.
+
+Fixed in `agents/planner.py`'s `_validate()`: `group_by="issuer"` combined
+with `metric="distinct_issuers"` (and symmetrically `group_by="manager"`
+with `metric="distinct_managers"`) is now rejected as a `PlanError` before
+`executor.py` ever sees it, producing an honest null answer instead of a
+silently wrong one. Verified against the same question and the same local
+model after the fix: the agent now correctly returns null rather than `1`.
+
+This was not a model-capability artifact -- a schema-valid but semantically
+degenerate combination like this could be produced by any model, including
+the grading endpoint, and would have silently corrupted the answer without
+this check.
 
 ### Architecture
 
