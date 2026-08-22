@@ -128,12 +128,18 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-from fetch import fetch  # noqa: E402
+from fetch import fetch, set_user_agent  # noqa: E402
+
+# Required by SEC on every request, including the supplementary live fetch
+# below. Filled in here (not a placeholder) so this script runs end-to-end
+# with no manual editing, per the Chapter 2 spec.
+set_user_agent("Hsuan-Yu Shih hsuanyu5@illinois.edu")
 
 FILINGS_DIR = Path(__file__).resolve().parent.parent / "output" / "filings"
 
-# 補充範例（不在 Ch1 的 40 筆核心清單裡，因為那 40 筆刻意排除了通知/修正案）：
-# 一份真正的 13F-NT（Pershing Square Q2 2026）跟一組真正的修正案（Tudor 2025Q3）。
+# Supplementary examples outside the curated 40 (which deliberately excludes
+# notices/amendments): a real 13F-NT (Pershing Square, Q2 2026) and a real
+# amendment pair (Tudor, 2025 Q3).
 NOTICE_EXAMPLE = ("1336528", "0001172661-26-003777")
 AMENDMENT_EXAMPLES = [
     ("923093", "0000902664-25-005239"),  # amendmentNo 1: RESTATEMENT
@@ -153,7 +159,7 @@ def localname(tag: str) -> str:
 
 
 def find_local(elem: ET.Element, name: str) -> ET.Element | None:
-    """在任何 namespace/prefix 底下找第一個叫這個名字的子元素（含自己遞迴往下找）。"""
+    """Find the first descendant (recursive) whose local name matches, regardless of namespace/prefix."""
     for child in elem.iter():
         if localname(child.tag) == name:
             return child
@@ -166,10 +172,11 @@ def findall_local(elem: ET.Element, name: str) -> list[ET.Element]:
 
 def direct_children_local(elem: ET.Element, name: str) -> list[ET.Element]:
     """
-    只找「直接子元素」符合這個名字的節點，不遞迴往下找。
-    otherManagersInfo/otherManager 跟 otherManagers2Info/otherManager2/otherManager
-    兩個位置都有叫 otherManager 的元素，用 elem.iter() 會把兩邊混在一起，
-    這裡刻意只看某一層底下的直接子節點，把兩份清單分開。
+    Only match direct children with this local name -- no recursion.
+    Both otherManagersInfo/otherManager and
+    otherManagers2Info/otherManager2/otherManager contain elements named
+    otherManager; elem.iter() would conflate the two lists. This stays
+    scoped to one level so the two lists are kept separate.
     """
     return [child for child in elem if localname(child.tag) == name]
 
@@ -182,7 +189,7 @@ def text_of(elem: ET.Element, name: str, default: str | None = None) -> str | No
 
 
 def iter_filing_pairs():
-    """依序 yield Ch1 下載的 40 筆 (cik, accession, cover_path, info_path)。"""
+    """Yield the 40 (cik, accession, cover_path, info_path) tuples downloaded in Chapter 1, in order."""
     for cover_path in sorted(FILINGS_DIR.glob("*/*.cover.xml")):
         accession = cover_path.name[: -len(".cover.xml")]
         info_path = cover_path.parent / f"{accession}.xml"
@@ -305,8 +312,9 @@ def section_table_entry_total_check() -> None:
         other_included = text_of(cover_root, "otherIncludedManagersCount")
 
         if not info_path.exists():
-            # 13F-NT 通知本來就沒有持股明細表，download_filings.py 也就沒存這份檔案，
-            # 與 declared=None（table_entry_total 應該是 null）一致，不算失敗。
+            # A 13F-NT notice has no information table by design, so
+            # download_filings.py never wrote this file. Consistent with
+            # declared=None (table_entry_total should be null) -- not a failure.
             notices_without_info_table += 1
             assert declared is None, f"CIK {cik} accession {accession}: expected null tableEntryTotal on a notice, got {declared!r}"
             continue
@@ -348,7 +356,7 @@ def section_cusip_cins() -> None:
 
     for _cik, _accession, _cover_path, info_path in iter_filing_pairs():
         if not info_path.exists():
-            continue  # 13F-NT 通知沒有持股明細表
+            continue  # a 13F-NT notice has no information table
         root = ET.parse(info_path).getroot()
         cusips = [text_of(row, "cusip") for row in findall_local(root, "infoTable")]
         cusips = [c for c in cusips if c]
@@ -380,7 +388,7 @@ def section_voting_and_putcall() -> None:
 
     for _cik, _accession, _cover_path, info_path in iter_filing_pairs():
         if not info_path.exists():
-            continue  # 13F-NT 通知沒有持股明細表
+            continue  # a 13F-NT notice has no information table
         files_with_info_table += 1
         root = ET.parse(info_path).getroot()
         rows = findall_local(root, "infoTable")
@@ -417,7 +425,7 @@ def section_entities() -> None:
     example_found = False
     for cik, accession, _cover_path, info_path in iter_filing_pairs():
         if not info_path.exists():
-            continue  # 13F-NT 通知沒有持股明細表
+            continue  # a 13F-NT notice has no information table
         raw_text = info_path.read_text(encoding="utf-8", errors="replace")
         m = re.search(r"nameOfIssuer>([^<]*&amp;[^<]*)<", raw_text)
         if m and not example_found:
@@ -507,7 +515,7 @@ def section_supplementary_amendment_example() -> None:
 
 def main() -> int:
     if not FILINGS_DIR.exists() or not any(FILINGS_DIR.glob("*/*.cover.xml")):
-        print(f"找不到 {FILINGS_DIR} 底下的申報檔案 —— 先跑完 Chapter 1 的三支腳本。", file=sys.stderr)
+        print(f"No filings found under {FILINGS_DIR} -- run Chapter 1's scripts first.", file=sys.stderr)
         return 1
 
     section_schema_mapping()
