@@ -40,12 +40,18 @@ def main(question: str) -> dict[str, Any]:
         result = executor.execute(plan)
     except Exception as exc:  # noqa: BLE001 -- a crash must still score as a null answer
         logger.warning("could not answer %r: %s", question, exc)
-        return {"answer": None, "unit": "NONE", "sources": []}
+        return {"answer": None, "unit": "NONE", "sources": [],
+                "note": "Couldn't produce a valid query plan for this question."}
 
     if result.answer is None and result.note:
         logger.info("null answer for %r: %s", question, result.note)
 
-    return {"answer": result.answer, "unit": result.unit, "sources": result.sources}
+    return {
+        "answer": result.answer,
+        "unit": result.unit,
+        "sources": result.sources,
+        "note": result.note,
+    }
 
 
 def _cli() -> int:

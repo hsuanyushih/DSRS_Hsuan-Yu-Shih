@@ -33,7 +33,10 @@ class Result:
 
 
 def _null(reason: str) -> Result:
-    return Result(answer=None, unit="NONE", sources=[], note=reason)
+    natural_reason = reason
+    if "not in dataset" in reason.lower() or "out of scope" in reason.lower():
+        natural_reason = "This dataset only includes 2026 Q1 and Q2, so that quarter isn't available."
+    return Result(answer=None, unit="NONE", sources=[], note=natural_reason)
 
 
 def _cik_to_name(filings: pd.DataFrame) -> dict[str, str]:
