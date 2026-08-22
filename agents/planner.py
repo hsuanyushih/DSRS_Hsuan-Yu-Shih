@@ -1,16 +1,3 @@
-"""問題 -> 結構化查詢計畫（QueryPlan）。
-
-LLM 在這裡唯一的工作是把使用者的自然語言問題，翻譯成一組白名單欄位/列舉值組成的
-查詢計畫 —— 不是 SQL、不是可執行的程式碼字串。計畫產出後一律經過 `validate_plan`
-逐欄檢查（型別、列舉值、範圍），驗證失敗一律視為「無法規劃」而不是硬塞一個猜測值，
-執行端（executor.py）再依這組白名單欄位對 pandas DataFrame 做篩選/聚合。
-
-送進 prompt 的內容只有使用者問題本身和固定的系統說明文字，絕不包含任何申報書裡的
-自由文字（name_of_issuer / title_of_class 等）—— 那些欄位是第三方申報者填的，
-放進 prompt 就等於把不受控的文字餵進指令通道，因此 issuer/manager 的名字解析全部
-留在 data.py 用本地字串比對完成，模型只需要把「使用者打的那段文字」原封不動抄出來。
-"""
-
 from __future__ import annotations
 
 import logging
@@ -157,6 +144,17 @@ def _validate(raw: Any) -> QueryPlan:
         raise PlanError(f"invalid aggregate: {aggregate!r}")
     if group_by not in GROUP_BYS:
         raise PlanError(f"invalid group_by: {group_by!r}")
+    if metric == "distinct_issuers" and group_by == "issuer":
+        raise PlanError(
+            "group_by='issuer' with metric='distinct_issuers' is degenerate "
+            "(every group would trivially count 1)"
+        )
+    if metric == "distinct_managers" and group_by == "manager":
+        raise PlanError(
+            "group_by='manager' with metric='distinct_managers' is degenerate "
+            "(every group would trivially count 1)"
+        )
+
     if answer_format not in ANSWER_FORMATS:
         raise PlanError(f"invalid answer_format: {answer_format!r}")
     if sort_order not in SORT_ORDERS:
