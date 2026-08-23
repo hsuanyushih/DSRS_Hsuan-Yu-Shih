@@ -235,6 +235,11 @@
     transform: rotate(-4deg);
     white-space: nowrap;
   }
+  .stamp-fault {
+    color: var(--ink-soft);
+    background: #ECEAE3;
+    border-color: var(--ink-soft);
+  }
   .stamp-note {
     font-size: 14.5px;
     line-height: 1.55;
@@ -348,9 +353,12 @@ function renderAnswered(data) {
 
 function renderNull(data) {
   const message = data.note || "This one isn't in the dataset.";
+  const isPlanningFailure = /valid query plan/i.test(message);
+  const stampLabel = isPlanningFailure ? "COULDN'T PARSE" : "NOT ON FILE";
+  const stampClass = isPlanningFailure ? "stamp stamp-fault" : "stamp";
   resultEl.innerHTML = `
     <div class="panel stamp-card">
-      <div class="stamp">NOT&nbsp;ON&nbsp;FILE</div>
+      <div class="${stampClass}">${stampLabel.replace(/ /g, "&nbsp;")}</div>
       <div class="stamp-note">
         <div class="heading">${escapeHtml(message)}</div>
       </div>
