@@ -1,5 +1,9 @@
 # Assumptions
 
+This document records decisions made where the spec was ambiguous, or where a
+judgment call was required and the reasoning is worth preserving.
+
+---
 
 ## Chapter 1 · Source
 
@@ -154,6 +158,34 @@ This was not a model-capability artifact -- a schema-valid but semantically
 degenerate combination like this could be produced by any model, including
 the grading endpoint, and would have silently corrupted the answer without
 this check.
+
+### Observed non-determinism in local Ollama testing (not present by design)
+
+Re-running the same question against the same local model
+(`llama3.2:3b`, temperature=0.0) twice produced two different numeric
+answers: "What was Third Point LLC's largest position by value in 2026 Q1"
+returned `2082795760` on one run and the correct `404043800` (verified
+directly against `holdings.parquet`) on a later run, with identical code
+and identical question text.
+
+`agents/llm.py` sets `temperature=0.0` unconditionally, which should make
+generation greedy and deterministic. `04-serve.md` is explicit that this is
+required: "If your agent gives different answers to identical questions
+across runs, something in it is non-deterministic." Nothing in
+`planner.py` or `executor.py` introduces non-determinism -- no unordered
+set iteration, no unstable sort, no retry that changes the prompt (verified
+by inspection; `_execute_grouped`/`_execute_delta` explicitly use
+`kind="stable"` sorts with a secondary key for this reason).
+
+The most likely source is Ollama/llama.cpp's own prompt-caching layer:
+server logs show the second run hit a cached prefix via LCP similarity
+matching rather than generating from scratch, and the sampled continuation
+differed despite temperature=0. This is a property of the local
+llama.cpp-based serving stack, not of the agent's logic. The grading
+endpoint runs vLLM, whose greedy decoding at temperature=0 does not share
+this caching behavior. This could not be directly confirmed against the
+grading endpoint since it wasn't available during development; flagging it
+here rather than assuming it's resolved.
 
 ### Architecture
 
