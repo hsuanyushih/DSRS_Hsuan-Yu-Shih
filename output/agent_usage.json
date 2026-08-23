@@ -4,76 +4,76 @@
       "question": "Which manager held the largest Apple position in 2026 Q2?",
       "calls": 1,
       "prompt_tokens": 787,
-      "completion_tokens": 122,
-      "elapsed_seconds": 1.989
+      "completion_tokens": 116,
+      "elapsed_seconds": 3.068
     },
     {
       "question": "Which manager added the most Nvidia shares between 2026 Q1 and 2026 Q2?",
       "calls": 1,
       "prompt_tokens": 793,
-      "completion_tokens": 400,
-      "elapsed_seconds": 5.641
+      "completion_tokens": 125,
+      "elapsed_seconds": 3.07
     },
     {
       "question": "How many distinct issuers did Renaissance Technologies LLC report in 2026 Q2?",
       "calls": 1,
       "prompt_tokens": 790,
-      "completion_tokens": 400,
-      "elapsed_seconds": 5.629
+      "completion_tokens": 120,
+      "elapsed_seconds": 2.892
     },
     {
       "question": "What was the total reported value of Citadel Advisors LLC's holdings in 2026 Q1?",
       "calls": 1,
       "prompt_tokens": 792,
-      "completion_tokens": 120,
-      "elapsed_seconds": 1.697
+      "completion_tokens": 116,
+      "elapsed_seconds": 2.751
     },
     {
       "question": "Which managers in the roster filed a 13F-NT instead of a 13F-HR for 2026 Q2?",
       "calls": 1,
       "prompt_tokens": 800,
-      "completion_tokens": 149,
-      "elapsed_seconds": 2.11
+      "completion_tokens": 117,
+      "elapsed_seconds": 2.718
     },
     {
       "question": "Did Pershing Square Capital Management report any Microsoft holdings directly in 2026 Q2?",
       "calls": 1,
       "prompt_tokens": 792,
-      "completion_tokens": 264,
-      "elapsed_seconds": 3.709
+      "completion_tokens": 119,
+      "elapsed_seconds": 2.762
     },
     {
       "question": "Which manager reported the most call options in 2026 Q2?",
       "calls": 1,
       "prompt_tokens": 787,
-      "completion_tokens": 128,
-      "elapsed_seconds": 1.816
+      "completion_tokens": 118,
+      "elapsed_seconds": 2.722
     },
     {
       "question": "What was Third Point LLC's largest position by value in 2026 Q1, and what was it?",
       "calls": 1,
       "prompt_tokens": 795,
-      "completion_tokens": 144,
-      "elapsed_seconds": 2.042
+      "completion_tokens": 117,
+      "elapsed_seconds": 2.731
     },
     {
       "question": "Which manager held Tesla in both 2026 Q1 and 2026 Q2, and did the position grow or shrink?",
       "calls": 1,
       "prompt_tokens": 799,
-      "completion_tokens": 119,
-      "elapsed_seconds": 1.693
+      "completion_tokens": 126,
+      "elapsed_seconds": 2.907
     },
     {
       "question": "What was the average portfolio value across all managers in 2026 Q3?",
       "calls": 1,
       "prompt_tokens": 789,
-      "completion_tokens": 217,
-      "elapsed_seconds": 3.067
+      "completion_tokens": 107,
+      "elapsed_seconds": 2.652
     }
   ],
   "totals": {
     "calls": 10,
     "prompt_tokens": 7924,
-    "completion_tokens": 2063
+    "completion_tokens": 1181
   }
 }
