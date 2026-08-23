@@ -220,6 +220,78 @@ normalization and matching (reusing `src/cik_verify.py`'s name-normalization
 logic), not through the model, since filing-sourced issuer names are
 third-party free text and therefore untrusted input.
 
+
+## Bonus 1 · Notice attribution
+
+### Parent identification
+
+Pershing Square Capital Management L.P. (CIK 1336528) filed a 13F-NT for
+2026 Q2 (accession `0001172661-26-003777`). Its cover page's
+`otherManagersInfo/otherManager` block names the parent filer directly:
+CIK `0002026053`, "PERSHING SQUARE INC." -- not one of the 20 roster
+managers, so its filing was fetched separately via the submissions API
+(same User-Agent and rate-limit handling as Chapter 1). The parent's
+2026 Q2 13F-HR is accession `0001172661-26-003790`.
+
+### The mechanism, and two real structural surprises
+
+The parent's cover page declares an `otherManagers2Info` list assigning a
+sequence number to each affiliated manager it reports on behalf of.
+Pershing Square Capital Management, L.P. is sequence number `1` in that
+list. Two things about the real XML did not match the flatter structure
+implied by `02-interrogate.md`'s description, and both were confirmed by
+reading the actual fetched files rather than assumed:
+
+1. **`otherManager2` nests its own `otherManager` sub-block.** The
+   sequence number and the manager's cik/name are not siblings --
+   `sequenceNumber` sits directly under `otherManager2`, while `cik` and
+   `name` sit one level deeper, under `otherManager2 > otherManager`. A
+   flat read of `otherManager2`'s direct children finds `sequenceNumber`
+   but nothing else.
+2. **`otherManager` in the information table is not always a single
+   value.** It can be a comma-separated list of sequence numbers (e.g.
+   `"1, 2, 3, 4"`, `"1, 2, 3, 4, 6"`), meaning a single position is
+   jointly attributed to several of the parent's affiliated managers at
+   once, not to exactly one. Every one of the parent's 15 information-table
+   rows in this filing carries a multi-manager list; there is no row where
+   Pershing Square Capital Management is the sole `otherManager` value.
+   Attribution therefore means "sequence 1 appears in this row's list,"
+   not "this row's value equals 1" -- `src/bonus_notice_attribution.py`
+   splits on commas and checks membership accordingly.
+
+### Attribution result
+
+14 of the parent's 15 rows reference sequence 1 (Pershing Square Capital
+Management); the one excluded row lists `"3, 4, 5"` and does not include
+Pershing Square. All 14 attributed positions are large, well-known
+holdings (Amazon, Meta, Microsoft, Visa, Uber, Mastercard, S&P Global,
+Netflix, Brookfield, Restaurant Brands, Hertz, and two Howard Hughes
+lots) -- consistent with Pershing Square's known concentrated,
+large-cap-equity investing style, which is corroborating evidence that
+the right manager and the right rows were found, not just a plausible
+row count. Total attributed value: $19,316,172,772.
+
+`output/bonus_attributed.parquet` has 14 rows: the `holdings.parquet`
+schema plus `attributed_to_cik = "0001336528"` on every row, with
+`accession_number` set to the parent's accession
+(`0001172661-26-003790`), per the spec -- these are real rows from a real
+filing, not the notice.
+
+### What this means for "ownership"
+
+Because every attributed row is jointly held with at least three other
+affiliated managers (never Pershing Square alone), this filing does not
+support a claim that Pershing Square Capital Management held any of these
+14 positions independently. What it supports is narrower and more
+accurate: these are positions the Pershing Square affiliated group
+reported, in which Pershing Square Capital Management, L.P. is one of the
+managers exercising some form of discretion or voting authority, per
+`investment_discretion` and the `voting_*` columns carried alongside each
+row. A researcher using this output should read `attributed_to_cik` as
+"this manager is party to this position," not "this manager alone owns
+this position."
+
+
 ## Bonus 2 · CUSIP validation
 
 ### Parsing the official list

@@ -1,0 +1,258 @@
+<?xml version="1.0" ?>
+<informationTable xsi:schemaLocation="http://www.sec.gov/edgar/document/thirteenf/informationtable eis_13FDocument.xsd" xmlns="http://www.sec.gov/edgar/document/thirteenf/informationtable" xmlns:n1="http://www.sec.gov/edgar/document/thirteenf/informationtable" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <infoTable>
+    <nameOfIssuer>AMAZON COM INC</nameOfIssuer>
+    <titleOfClass>COM</titleOfClass>
+    <cusip>023135106</cusip>
+    <value>2041109677</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>8563857</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>8563857</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>BROOKFIELD CORP</nameOfIssuer>
+    <titleOfClass>CL A LTD VT SH</titleOfClass>
+    <cusip>11271J107</cusip>
+    <value>2448117792</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>57481047</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>57481047</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>HERTZ GLOBAL HLDGS INC</nameOfIssuer>
+    <titleOfClass>COM NEW</titleOfClass>
+    <cusip>42806J700</cusip>
+    <value>33955972</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>14991599</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>14991599</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>HOWARD HUGHES HOLDINGS INC</nameOfIssuer>
+    <titleOfClass>COM</titleOfClass>
+    <cusip>44267T102</cusip>
+    <value>1347734055</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>18852064</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>18852064</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>HOWARD HUGHES HOLDINGS INC</nameOfIssuer>
+    <titleOfClass>COM</titleOfClass>
+    <cusip>44267T102</cusip>
+    <value>643410000</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>9000000</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4, 6</otherManager>
+    <votingAuthority>
+      <Sole>9000000</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>MASTERCARD INCORPORATED</nameOfIssuer>
+    <titleOfClass>CL A</titleOfClass>
+    <cusip>57636Q104</cusip>
+    <value>1091218186</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>2124646</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>2124646</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>META PLATFORMS INC</nameOfIssuer>
+    <titleOfClass>CL A</titleOfClass>
+    <cusip>30303M102</cusip>
+    <value>1800309764</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>3196062</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>3196062</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>MICROSOFT CORP</nameOfIssuer>
+    <titleOfClass>COM</titleOfClass>
+    <cusip>594918104</cusip>
+    <value>2315234425</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>6206730</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>6206730</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>NETFLIX INC.</nameOfIssuer>
+    <titleOfClass>COM</titleOfClass>
+    <cusip>64110L106</cusip>
+    <value>934016601</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>13081465</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>13081465</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>PERSHING SQUARE USA LTD</nameOfIssuer>
+    <titleOfClass>COM SHS</titleOfClass>
+    <cusip>71531T105</cusip>
+    <value>149520000</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>4000000</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>3, 4, 5</otherManager>
+    <votingAuthority>
+      <Sole>4000000</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>RESTAURANT BRANDS INTL INC</nameOfIssuer>
+    <titleOfClass>COM</titleOfClass>
+    <cusip>76131D103</cusip>
+    <value>1872301303</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>25821284</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>25821284</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>S&amp;P GLOBAL INC</nameOfIssuer>
+    <titleOfClass>COM</titleOfClass>
+    <cusip>78409V104</cusip>
+    <value>1056088305</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>2593155</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>2593155</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>SEAPORT ENTMT GROUP INC</nameOfIssuer>
+    <titleOfClass>COMMON STOCK</titleOfClass>
+    <cusip>812215200</cusip>
+    <value>133632548</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>5023780</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>5023780</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>UBER TECHNOLOGIES INC</nameOfIssuer>
+    <titleOfClass>COM</titleOfClass>
+    <cusip>90353T100</cusip>
+    <value>2476978592</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>34326200</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>34326200</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+  <infoTable>
+    <nameOfIssuer>VISA INC</nameOfIssuer>
+    <titleOfClass>COM CL A</titleOfClass>
+    <cusip>92826C839</cusip>
+    <value>1122065552</value>
+    <shrsOrPrnAmt>
+      <sshPrnamt>3270470</sshPrnamt>
+      <sshPrnamtType>SH</sshPrnamtType>
+    </shrsOrPrnAmt>
+    <investmentDiscretion>DFND</investmentDiscretion>
+    <otherManager>1, 2, 3, 4</otherManager>
+    <votingAuthority>
+      <Sole>3270470</Sole>
+      <Shared>0</Shared>
+      <None>0</None>
+    </votingAuthority>
+  </infoTable>
+</informationTable>
