@@ -1,9 +1,12 @@
-"""唯讀資料存取層 — 載入 Chapter 3 的兩張 Parquet，並提供 manager/issuer/quarter 的名字解析。
+"""Read-only data access layer -- loads Chapter 3's two Parquet tables and
+resolves manager / issuer / quarter names.
 
-這一層只做兩件事：讀檔案、做字串比對。所有實際的聚合/篩選都在 executor.py 裡用
-pandas 做，這裡完全不執行任何模型或使用者提供的程式碼字串 —— name_of_issuer 和
-title_of_class 是申報者自己填的自由文字（見 docs/SCHEMA.md 的 Namespaces 段），
-只拿來做本地字串比對，絕不會被塞進送給 LLM 的 prompt 裡當指令。
+This layer only does two things: read files, and do string comparison. All
+actual filtering/aggregation happens in executor.py via pandas -- nothing
+here executes a model or user-supplied code string. name_of_issuer and
+title_of_class are free text filed by third parties (see the Namespaces
+section of docs/SCHEMA.md); they are only ever used for local string
+matching and are never passed into a prompt sent to the LLM.
 """
 
 from __future__ import annotations
@@ -27,8 +30,44 @@ HOLDINGS_PATH = OUTPUT / "holdings.parquet"
 QUARTER_RE = re.compile(r"(?P<year>20\d{2})\D{0,4}Q(?P<q>[1-4])", re.IGNORECASE)
 CUSIP_RE = re.compile(r"^[A-Z0-9]{9}$")
 
-# 申報文字裡常見、對比對沒有意義的字尾/後綴，比對前先拿掉，
-# 這樣 "Apple Inc" 和使用者打的 "apple" 才會配到同一個 issuer。
+
+def _cusip_char_value(c: str) -> int:
+    """Map a CUSIP character to its numeric value: digits 0-9, letters A=10..Z=35, *=36, @=37, #=38."""
+    if c.isdigit():
+        return int(c)
+    if c.isalpha():
+        return ord(c.upper()) - ord("A") + 10
+    if c == "*":
+        return 36
+    if c == "@":
+        return 37
+    if c == "#":
+        return 38
+    return 0
+
+
+def is_valid_cusip(cusip: str) -> bool:
+    """Validate a 9-character CUSIP's check digit (standard weighted mod-10
+    algorithm). The 9th character is a check digit computed from the first
+    8: every even (1-indexed) position is doubled before summing digit-by-
+    digit. A well-formed-but-invalid-checksum CUSIP -- a single transposed
+    or mistyped digit -- looks completely valid by shape alone; this is
+    what catches it before it's used as a filter value."""
+    if not cusip or len(cusip) != 9:
+        return False
+    total = 0
+    for i, c in enumerate(cusip[:8]):
+        val = _cusip_char_value(c)
+        if i % 2 == 1:
+            val *= 2
+        total += val // 10 + val % 10
+    expected = str((10 - (total % 10)) % 10)
+    return cusip[8] == expected
+
+
+# Common suffixes/words in filing text that carry no matching value --
+# stripped before comparison so "Apple Inc" and a user-typed "apple" match
+# the same issuer.
 ISSUER_NOISE_WORDS = {
     "INC", "CORP", "CO", "LTD", "PLC", "LLC", "LP", "SA", "AG", "NV", "SE",
     "CLASS", "CL", "COM", "SPONSORED", "ADS", "ADR", "US", "USA",
@@ -43,7 +82,8 @@ def _normalize_issuer(name: str) -> str:
 
 @functools.lru_cache(maxsize=1)
 def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
-    """讀入兩張 Parquet，唯讀（pyarrow.read_table 不會、也無法寫回檔案）。"""
+    """Load both Parquet tables, read-only (pyarrow.read_table neither writes
+    back nor can be made to)."""
     filings = pq.read_table(FILINGS_PATH).to_pandas()
     holdings = pq.read_table(HOLDINGS_PATH).to_pandas()
     return filings, holdings
@@ -51,7 +91,8 @@ def load_data() -> tuple[pd.DataFrame, pd.DataFrame]:
 
 @functools.lru_cache(maxsize=1)
 def _manager_index() -> list[dict]:
-    """每個 cik 一筆，帶正規化後的 fund_name / filing_manager 核心名字，供比對用。"""
+    """One entry per CIK, with normalized fund_name / filing_manager core
+    names for matching."""
     filings, _ = load_data()
     seen: dict[str, dict] = {}
     for cik, group in filings.groupby("cik"):
@@ -70,10 +111,10 @@ def _manager_index() -> list[dict]:
 
 
 def resolve_manager(query: str | None) -> list[dict]:
-    """把使用者問題裡的經理人名字片段，比對回名冊上的 cik。
+    """Resolve a manager-name fragment from a question back to a roster CIK.
 
-    回傳依信心排序的候選清單；找不到任何候選就回傳空清單（呼叫端要把這當成
-    "無法回答"，而不是硬選一個）。
+    Returns candidates ranked by confidence; an empty list means the caller
+    should treat this as "cannot answer" rather than guessing one.
     """
     if not query:
         return []
@@ -87,7 +128,8 @@ def resolve_manager(query: str | None) -> list[dict]:
     if exact:
         return exact
 
-    # 完全比對不到就退而求其次：子字串包含，再退而求其次用模糊比對分數排序。
+    # No exact match: fall back to substring containment, then to a
+    # fuzzy-match score ranking as a last resort.
     contains = [row for row in index
                 if query_core in row["fund_core"] or query_core in row["manager_core"]]
     if contains:
@@ -107,21 +149,24 @@ def resolve_manager(query: str | None) -> list[dict]:
 
 @functools.lru_cache(maxsize=1)
 def _issuer_index() -> list[tuple[str, str]]:
-    """(正規化後名字, 原始 name_of_issuer) 的清單，一個原始名字只留一筆。"""
+    """List of (normalized name, original name_of_issuer); one entry per
+    distinct original spelling."""
     _, holdings = load_data()
     names = holdings["name_of_issuer"].unique()
     return [(_normalize_issuer(n), n) for n in names]
 
 
 def resolve_issuer(query: str | None) -> list[str]:
-    """把使用者問題裡的證券/公司名字片段，比對回 holdings 裡實際出現過的 name_of_issuer。
+    """Resolve a security/company-name fragment from a question back to the
+    original name_of_issuer strings that actually appear in holdings.
 
-    回傳符合的原始 name_of_issuer 字串清單（同一家公司在資料裡可能有好幾種拼法）。
+    Returns the matching original name_of_issuer strings (the same company
+    may appear under several spellings in the data).
     """
     if not query:
         return []
     if CUSIP_RE.match(query.strip().upper()):
-        return [query.strip().upper()]  # 交給呼叫端當 cusip 直接比對
+        return [query.strip().upper()]  # let the caller compare this as a CUSIP directly
 
     query_norm = _normalize_issuer(query)
     if not query_norm:
@@ -137,7 +182,8 @@ def resolve_issuer(query: str | None) -> list[str]:
     if contains:
         return contains
 
-    # 逐字比對：查詢字串的每個詞都要出現在候選名字裡，避免太寬鬆誤配。
+    # Word-subset match: every word in the query must appear in the
+    # candidate name, to avoid an overly loose false match.
     query_words = set(query_norm.split(" "))
     word_match = [orig for norm, orig in index
                   if query_words and query_words.issubset(set(norm.split(" ")))]
@@ -154,9 +200,11 @@ def resolve_issuer(query: str | None) -> list[str]:
 
 
 def resolve_quarters(texts: list[str] | None) -> list[str]:
-    """把 "2026 Q2" / "Q2 2026" / "2026Q2" 這類寫法統一成 report_quarter 用的 "2026Q2"。
+    """Normalize spellings like "2026 Q2" / "Q2 2026" / "2026Q2" into the
+    "2026Q2" form used by report_quarter.
 
-    只回傳資料集裡真的存在的季度；問到資料集沒有的季度（例如 2026Q3）視同查無資料。
+    Only returns quarters that actually exist in the dataset; a quarter the
+    dataset doesn't have (e.g. 2026Q3) is treated the same as no data found.
     """
     if not texts:
         return []

@@ -159,6 +159,22 @@ degenerate combination like this could be produced by any model, including
 the grading endpoint, and would have silently corrupted the answer without
 this check.
 
+A second instance surfaced testing CUSIP lookups: "What is the value of
+CUSIP 037833100 in 2026 Q2?" (Apple) returned `29463108627` on one call --
+missing Tudor Investment Corp and Millennium Management LLC entirely from
+the sum (true total, verified directly against `holdings.parquet`, is
+`34087212507`). Re-running the identical question immediately after,
+against the same unmodified code, produced the correct total with both
+managers correctly included in the accession whitelist. Stepping through
+`execute()`'s intermediate state (the resolved `quarters`, `form_types`,
+and the `_filter_filings()` whitelist) on the second call confirmed every
+filtering step was correct and both managers' filings passed the
+`form_type == "13F-HR"` check as expected. Since the same code produced
+different QueryPlans (and therefore different results) for byte-identical
+input across two calls, this points to the LLM call itself, not
+`executor.py`'s filtering logic, as the source -- consistent with the
+`temperature=0` non-determinism already documented above.
+
 ### Observed non-determinism in local Ollama testing (not present by design)
 
 Re-running the same question against the same local model
@@ -203,3 +219,77 @@ Manager and issuer name resolution happens locally in `data.py` via string
 normalization and matching (reusing `src/cik_verify.py`'s name-normalization
 logic), not through the model, since filing-sourced issuer names are
 third-party free text and therefore untrusted input.
+
+## Bonus 2 · CUSIP validation
+
+### Parsing the official list
+
+SEC's Official List of Section 13(f) Securities is a fixed-width text file,
+per SEC's own published column spec
+(https://www.sec.gov/divisions/investment/13flists.htm): CUSIP in columns
+1-9, an option indicator in column 10, issuer name in columns 11-40, issuer
+description in columns 41-67, status in columns 68-70. This is not
+whitespace-delimited, and an earlier draft of the parser assumed it was
+(splitting on runs of two-plus spaces) -- that assumption was wrong and was
+replaced with fixed-offset slicing after fetching the real file and
+confirming the column boundaries against a sample row (e.g.
+`B38564108*CMB.TECH NV                   SHS...` slices cleanly into
+CUSIP=`B38564108`, option=`*`, name=`CMB.TECH NV`). `src/bonus_cusip_validation.py`
+implements this.
+
+23,277 securities were parsed from the 2026 Q2 official list.
+
+### The check
+
+Every `(accession_number, cusip)` pair in the 2026 Q2 holdings was checked
+against the official list, after normalizing both sides (uppercase,
+strip non-alphanumerics) to rule out formatting differences as a source of
+false mismatches before drawing any conclusion about filers.
+
+**Result: 32,176 of 32,176 pairs matched (0 unmatched).**
+
+This number was surprising enough to distrust at first -- a 100% match rate
+across a large dataset invites the suspicion that the comparison itself is
+too lenient rather than that the data is genuinely clean. Before accepting
+it, four representative CUSIPs (two CINS-style, two domestic) were spot-checked
+by hand against the fetched official list text:
+
+| CUSIP | Filed as | Official list name |
+|---|---|---|
+| `68243Q106` | 1-800-Flowers.Com Inc - US | 1 800 FLOWERS COM INC |
+| `88554D205` | 3D Systems Corp - US | 3D SYS CORP DEL |
+| `G01767105` | Alkermes Plc - US | ALKERMES PLC |
+| `G1151C101` | Accenture Plc - US | ACCENTURE PLC IRELAND |
+
+In each case the filed name and the official-list name clearly refer to the
+same issuer despite differing formatting (suffix style, "- US" tags,
+abbreviations) -- which is the expected signature of a correct match, not a
+coincidental one. A parsing or normalization bug that manufactured false
+matches would be far more likely to produce mismatched issuer names between
+the two columns; it did not.
+
+CINS-style (letter-leading) CUSIPs were also not treated as automatically
+excluded from the official list: the raw list itself contains large numbers
+of letter-leading identifiers for foreign issuers trading in the US (e.g.
+`G01767105 ALKERMES PLC`, `G1151C101 ACCENTURE PLC IRELAND` both appear on
+the list directly), so a CINS-style CUSIP matching the list is expected
+behavior, not evidence of a bug.
+
+### Error identification
+
+No CUSIPs in the 2026 Q2 holdings failed to match the official list, so
+there were no candidates to classify as `LIKELY_FILER_ERROR`, `TIMING`, or
+`UNRESOLVED`. `output/bonus_cusip_validation.csv` has 32,176 rows, all with
+`on_official_list=True` and `assessment` null.
+
+### What I'd tell the researcher
+
+Every CUSIP reported by every manager in the 2026 Q2 dataset appears on
+SEC's own list of securities that are legitimately reportable on Form 13F
+for that quarter, with the reported and official issuer names clearly
+referring to the same underlying company in every spot-checked case. I
+found no evidence of a transposed digit, dropped character, or stale
+identifier in this slice of the data. That's a real finding, not an
+unfinished check: it doesn't mean typos are impossible in general -- 13F
+data is still hand-entered -- only that this particular quarter, for these
+twenty managers, doesn't contain one.

@@ -59,6 +59,14 @@ def _resolve_issuer_filter(query: str) -> tuple[str | None, list[str] | None, st
     if not names:
         return None, None, f"no issuer in the dataset matches {query!r}"
     if len(names) == 1 and data.CUSIP_RE.match(names[0]) and names[0] not in _known_issuer_names():
+        # A CUSIP-shaped query, resolved before we know whether it exists in
+        # the dataset. Validate its check digit before using it as a filter:
+        # a mistyped-but-well-formed CUSIP (a single transposed digit) is
+        # indistinguishable from a real one by shape alone, and would
+        # otherwise either silently match nothing (accidentally "safe") or,
+        # worse, coincidentally collide with an unrelated real position.
+        if not data.is_valid_cusip(names[0]):
+            return None, None, f"CUSIP {names[0]!r} has an invalid check digit"
         return names[0], None, None
     return None, names, None
 
