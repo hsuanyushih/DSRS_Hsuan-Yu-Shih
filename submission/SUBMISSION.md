@@ -4,7 +4,7 @@ Fill this in and commit it. A submission missing the video link is incomplete.
 
 ## Who
 
-- **Name:** Hsuan-Yu, Shih
+- **Name:** Hsuan-Yu Shih
 - **NetID:** hsuanyu5
 
 ## Video
@@ -58,7 +58,7 @@ grading endpoint, but was unable to confirm this directly.
 
 The most significant trade-off I'd flag is that I have not been able to verify
 answer accuracy end-to-end against the actual grading model, only that the
-pipeline is correctly wired, secure, and fails. With more time
+pipeline is correctly wired, secure, and fails gracefully. With more time
 I would test against a larger model or the actual grading endpoint to
 validate real answer correctness.
 
