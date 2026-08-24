@@ -1,15 +1,4 @@
-"""QueryPlan -> deterministic computation.
-
-No model output is ever executed as code here; every QueryPlan field has already been
-validated for type/enum values in planner.py, and manager_query/issuer_query have
-already been resolved via local string matching in data.py to a cik / name_of_issuer
-that actually exists in the dataset. The executor only applies whitelisted-field
-filter/groupby/sort operations to a pandas DataFrame -- no eval, no string-built queries.
-
-The same input always produces the same output: no reliance on sets with unstable
-iteration order, no retry logic that would change the prompt, and every sort uses a
-stable secondary key (cik or alphabetical name) to break ties.
-"""
+"""QueryPlan to deterministic computation."""
 
 from __future__ import annotations
 
@@ -29,7 +18,7 @@ class Result:
     answer: Any
     unit: str
     sources: list[str]
-    note: str | None = None  # only meaningful when answer is None; written to stderr
+    note: str | None = None  
 
 
 def _null(reason: str) -> Result:
@@ -59,12 +48,6 @@ def _resolve_issuer_filter(query: str) -> tuple[str | None, list[str] | None, st
     if not names:
         return None, None, f"no issuer in the dataset matches {query!r}"
     if len(names) == 1 and data.CUSIP_RE.match(names[0]) and names[0] not in _known_issuer_names():
-        # A CUSIP-shaped query, resolved before we know whether it exists in
-        # the dataset. Validate its check digit before using it as a filter:
-        # a mistyped-but-well-formed CUSIP (a single transposed digit) is
-        # indistinguishable from a real one by shape alone, and would
-        # otherwise either silently match nothing (accidentally "safe") or,
-        # worse, coincidentally collide with an unrelated real position.
         if not data.is_valid_cusip(names[0]):
             return None, None, f"CUSIP {names[0]!r} has an invalid check digit"
         return names[0], None, None
@@ -267,7 +250,7 @@ def _execute_grouped(plan: QueryPlan, h: pd.DataFrame, cik_to_name: dict[str, st
         agg_fn = {"sum": "sum", "max": "max", "min": "min", "avg": "mean", "count": "count"}[plan.aggregate]
         totals = h.groupby(group_col)[col].agg(agg_fn)
 
-    # group key as the secondary sort key so tied results are stable and reproducible.
+    # group key as the secondary sort key so tied results are stable and reproducible
     totals = totals.sort_index()
     ascending = plan.sort_order == "asc"
     totals = totals.sort_values(ascending=ascending, kind="stable")

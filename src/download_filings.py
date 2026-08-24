@@ -3,16 +3,6 @@ download_filings.py -- downloads the XML for the 40 filings in output/filings.cs
 saving to output/filings/{cik}/{accession}.xml (information table) and
 output/filings/{cik}/{accession}.cover.xml (cover page).
 
-Background:
-    Each filing folder actually contains two XML documents:
-        - primary_doc.xml            the cover page (filing_manager, amendment_type,
-                                      table_entry_total, and other Ch2 schema fields live here)
-        - another XML with an unpredictable filename   the actual information table (holdings)
-    This script uses index.json to find "the XML that is not primary_doc.xml" as the
-    information table, and downloads both, since later chapters need both.
-
-Usage (always run from the project root):
-    python3 src/download_filings.py
 """
 
 from __future__ import annotations
@@ -64,8 +54,7 @@ def find_info_table_doc(cik: str, accession: str) -> str | None:
         logger.warning("CIK %s accession %s: no information-table XML found", cik, accession)
         return None
 
-    # more than one candidate, pick the largest file (the info table is usually much
-    # bigger than the cover page/summary documents)
+    # more than one candidate, pick the largest file
     logger.warning(
         "CIK %s accession %s has %d candidate XML files %s, taking the largest, please verify manually",
         cik, accession, len(xml_docs), xml_docs,
@@ -107,8 +96,6 @@ def main() -> int:
             download_filing(cik, accession, COVER_PAGE_NAME, cover_path)
 
         if form in NOTICE_FORMS:
-            # a notice (NT) has no information table by definition; the cover page is
-            # the entire content of this filing
             logger.info("%s (%s) is a 13F-NT notice, no information table to download, skipping", fund_name, accession)
             ok_count += 1
             continue

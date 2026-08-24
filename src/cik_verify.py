@@ -15,8 +15,6 @@ Pipeline:
          - zero or multiple candidates          -> flagged for manual review
     4. Write output/filers.csv, sorted by CIK ascending.
 
-Run (always from the repo root):
-    python3 src/cik_verify.py
 """
 
 from __future__ import annotations

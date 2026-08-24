@@ -7,16 +7,6 @@ never the network — required for the "run it twice, byte-identical" contract
 in SCHEMA.md/03-structure.md: no re-fetch means no chance of picking up a
 filing that changed between runs.
 
-Every filing in output/filings.csv gets exactly one row in filings.parquet,
-notices included. A 13F-NT has a cover page and no information table, so it
-contributes zero rows to holdings.parquet — see ASSUMPTIONS.md for why this
-pipeline keeps the notice itself (CIK 1336528) rather than resolving it to
-the entity its otherManager points at.
-
-Run:
-    python3 src/parse_filings.py
-Then:
-    python verify.py
 """
 
 from __future__ import annotations
@@ -41,10 +31,8 @@ HOLDINGS_OUT_PATH = Path("output/holdings.parquet")
 NOTICE_FORMS = {"13F-NT", "13F-NT/A"}
 
 
-# ---------------------------------------------------------------------------
 # Namespace-agnostic XML helpers — filers use different prefixes (or none)
 # for the identical namespace URI; match on local name, never the literal tag.
-# ---------------------------------------------------------------------------
 
 def localname(tag: str) -> str:
     return tag.split("}", 1)[-1] if "}" in tag else tag
@@ -101,9 +89,7 @@ def report_quarter_of(report_period: dt.date) -> str:
     return f"{report_period.year}Q{quarter}"
 
 
-# ---------------------------------------------------------------------------
 # Reading the Chapter 1 output
-# ---------------------------------------------------------------------------
 
 def load_filing_index() -> list[dict]:
     """
@@ -199,10 +185,7 @@ def parse_holdings(info_path: Path, accession: str, cik: str, report_quarter: st
         voting = child(entry, "votingAuthority")
 
         other_manager = text_at(entry, "otherManager")
-        # "0" is not a valid 1-based sequence number in otherManagers2Info (see
-        # eda.py finding #6) — some filers (e.g. Renaissance) write it as an
-        # explicit placeholder instead of omitting the element. Both mean the
-        # same thing: no other manager, so both become a genuine null here.
+
         if other_manager == "0":
             other_manager = None
 
@@ -228,11 +211,7 @@ def parse_holdings(info_path: Path, accession: str, cik: str, report_quarter: st
     return rows
 
 
-# ---------------------------------------------------------------------------
-# Writing Parquet — built directly with pyarrow (no pandas) so there is no
-# pandas index to leak and no risk of numeric columns silently landing as
-# float64 instead of int64/int32.
-# ---------------------------------------------------------------------------
+# Writing Parquet — built directly with pyarrow
 
 FILINGS_SCHEMA = pa.schema([
     pa.field("accession_number", pa.string(), nullable=False),

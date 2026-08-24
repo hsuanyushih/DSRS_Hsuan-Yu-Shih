@@ -2,9 +2,7 @@
 
 Cached, rate-limited HTTP client for SEC EDGAR requests.
 
-All outbound requests in Chapter 1 (CIK lookup file, submissions API,
-archive directory listings, filing XML) go through fetch() rather than
-calling httpx directly:
+All outbound requests in Chapter 1 go through fetch() rather than calling httpx directly:
 
   1. SEC requires a User-Agent on every request.
   2. SEC caps clients at 10 req/sec; throttling is centralized here.
@@ -16,10 +14,6 @@ The User-Agent is not a module-level constant. main.py owns the
 --user-agent CLI flag and calls set_user_agent() once at startup;
 downstream modules under src/ call fetch(url) without repeating it.
 
-Usage:
-    from fetch import fetch, set_user_agent
-    set_user_agent(args.user_agent)
-    raw = fetch("https://data.sec.gov/submissions/CIK0001037389.json")
 """
 
 from __future__ import annotations
@@ -47,8 +41,7 @@ MAX_RETRIES = 5
 
 _last_request_monotonic = 0.0
 
-# Unset until main.py calls set_user_agent(). fetch() fails fast if called
-# beforehand rather than silently sending a blank or stale header.
+# Unset until main.py calls set_user_agent(). fetch() fails fast if called beforehand rather than silently sending a blank or stale header.
 _user_agent: str | None = None
 
 

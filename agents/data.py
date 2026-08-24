@@ -2,11 +2,8 @@
 resolves manager / issuer / quarter names.
 
 This layer only does two things: read files, and do string comparison. All
-actual filtering/aggregation happens in executor.py via pandas -- nothing
-here executes a model or user-supplied code string. name_of_issuer and
-title_of_class are free text filed by third parties (see the Namespaces
-section of docs/SCHEMA.md); they are only ever used for local string
-matching and are never passed into a prompt sent to the LLM.
+actual filtering/aggregation happens in executor.py via pandas
+
 """
 
 from __future__ import annotations
@@ -47,12 +44,7 @@ def _cusip_char_value(c: str) -> int:
 
 
 def is_valid_cusip(cusip: str) -> bool:
-    """Validate a 9-character CUSIP's check digit (standard weighted mod-10
-    algorithm). The 9th character is a check digit computed from the first
-    8: every even (1-indexed) position is doubled before summing digit-by-
-    digit. A well-formed-but-invalid-checksum CUSIP -- a single transposed
-    or mistyped digit -- looks completely valid by shape alone; this is
-    what catches it before it's used as a filter value."""
+    """Validate a 9-character CUSIP's check digit """
     if not cusip or len(cusip) != 9:
         return False
     total = 0
@@ -65,9 +57,6 @@ def is_valid_cusip(cusip: str) -> bool:
     return cusip[8] == expected
 
 
-# Common suffixes/words in filing text that carry no matching value --
-# stripped before comparison so "Apple Inc" and a user-typed "apple" match
-# the same issuer.
 ISSUER_NOISE_WORDS = {
     "INC", "CORP", "CO", "LTD", "PLC", "LLC", "LP", "SA", "AG", "NV", "SE",
     "CLASS", "CL", "COM", "SPONSORED", "ADS", "ADR", "US", "USA",
@@ -111,11 +100,7 @@ def _manager_index() -> list[dict]:
 
 
 def resolve_manager(query: str | None) -> list[dict]:
-    """Resolve a manager-name fragment from a question back to a roster CIK.
-
-    Returns candidates ranked by confidence; an empty list means the caller
-    should treat this as "cannot answer" rather than guessing one.
-    """
+    """Resolve a manager-name fragment from a question back to a roster CIK."""
     if not query:
         return []
     query_core, _ = split_core_and_suffix(query)
@@ -128,8 +113,6 @@ def resolve_manager(query: str | None) -> list[dict]:
     if exact:
         return exact
 
-    # No exact match: fall back to substring containment, then to a
-    # fuzzy-match score ranking as a last resort.
     contains = [row for row in index
                 if query_core in row["fund_core"] or query_core in row["manager_core"]]
     if contains:
@@ -149,20 +132,14 @@ def resolve_manager(query: str | None) -> list[dict]:
 
 @functools.lru_cache(maxsize=1)
 def _issuer_index() -> list[tuple[str, str]]:
-    """List of (normalized name, original name_of_issuer); one entry per
-    distinct original spelling."""
+    """List of normalized name, original name_of_issuer"""
     _, holdings = load_data()
     names = holdings["name_of_issuer"].unique()
     return [(_normalize_issuer(n), n) for n in names]
 
 
 def resolve_issuer(query: str | None) -> list[str]:
-    """Resolve a security/company-name fragment from a question back to the
-    original name_of_issuer strings that actually appear in holdings.
-
-    Returns the matching original name_of_issuer strings (the same company
-    may appear under several spellings in the data).
-    """
+    """Resolve a security/company-name fragment from a question back to the original name_of_issuer strings"""
     if not query:
         return []
     if CUSIP_RE.match(query.strip().upper()):
@@ -182,8 +159,7 @@ def resolve_issuer(query: str | None) -> list[str]:
     if contains:
         return contains
 
-    # Word-subset match: every word in the query must appear in the
-    # candidate name, to avoid an overly loose false match.
+    # Word-subset match: every word in the query must appear in the candidate name, to avoid an overly loose false match.
     query_words = set(query_norm.split(" "))
     word_match = [orig for norm, orig in index
                   if query_words and query_words.issubset(set(norm.split(" ")))]
@@ -200,12 +176,7 @@ def resolve_issuer(query: str | None) -> list[str]:
 
 
 def resolve_quarters(texts: list[str] | None) -> list[str]:
-    """Normalize spellings like "2026 Q2" / "Q2 2026" / "2026Q2" into the
-    "2026Q2" form used by report_quarter.
-
-    Only returns quarters that actually exist in the dataset; a quarter the
-    dataset doesn't have (e.g. 2026Q3) is treated the same as no data found.
-    """
+    """Normalize spellings like "2026 Q2" / "Q2 2026" / "2026Q2" into the "2026Q2" form used by report_quarter."""
     if not texts:
         return []
     filings, _ = load_data()

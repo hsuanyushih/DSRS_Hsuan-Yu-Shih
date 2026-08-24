@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Run the whole pipeline: fetch from EDGAR, parse, write the dataset.
 
-    python main.py --user-agent "FirstName LastName netid@illinois.edu"
-
 Entry point called by the grader. Must work from a clean checkout with
 nothing in output/. Runs, in order:
 
@@ -11,14 +9,6 @@ nothing in output/. Runs, in order:
     3. download_filings fetch and cache the filing XML
     4. parse_filings    parse into filings.parquet / holdings.parquet
 
-Each step writes intermediate output/ artifacts consumed by the next step;
-each step's main() returns 0 on success, non-zero on failure. The pipeline
-aborts on the first failing step rather than continuing on a broken input.
-
-Known limitation: all four steps currently write to hardcoded output/*
-paths rather than honoring --output. This assumes the grader runs from the
-repo root, which matches "must work from a clean checkout" in the README.
-Documented in submission/ASSUMPTIONS.md.
 """
 
 from __future__ import annotations
@@ -33,10 +23,6 @@ ROOT = Path(__file__).resolve().parent
 FILERS = ROOT / "filers.csv"
 OUTPUT = ROOT / "output"
 SRC = ROOT / "src"
-
-# SEC rejects requests without a contact address, and a run that gets the
-# department blocked is worth failing fast on. Loose on purpose: checks an
-# address is present, not that it is well-formed.
 UA_PATTERN = re.compile(r"^\S.*\s+[^@\s]+@[^@\s]+\.[a-z]{2,}\s*$", re.I)
 
 

@@ -167,7 +167,7 @@ def _validate(raw: Any) -> QueryPlan:
     top_n = raw["top_n"]
     if not isinstance(top_n, int):
         raise PlanError(f"top_n must be an integer, got {top_n!r}")
-    top_n = max(0, min(top_n, 50))  # 白名單範圍內夾住，避免離譜的值拖垮後續運算
+    top_n = max(0, min(top_n, 50)) 
 
     return QueryPlan(
         manager_query=raw["manager_query"],
@@ -188,12 +188,6 @@ def _validate(raw: Any) -> QueryPlan:
 
 
 def plan_query(question: str) -> QueryPlan:
-    """把 `question` 送進 LLM，拿回驗證過的 QueryPlan。
-
-    驗證失敗（包含 LLM_MODE=mock 底下固定回傳的 canned JSON 對不上這裡的欄位）
-    一律拋出 PlanError，由呼叫端接住並回傳 null 答案 —— 這是刻意設計成
-    "驗證失敗 = 無法規劃"，而不是塞一組預設值硬跑下去。
-    """
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": question},

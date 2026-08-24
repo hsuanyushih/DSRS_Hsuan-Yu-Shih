@@ -1,11 +1,4 @@
-"""Run agents/answer.py over docs/questions-examples.md and write output/agent_usage.json.
-
-    python -m agents.run_examples
-
-Per-question token/call usage comes from agents.llm.usage(), which is cumulative for
-the process -- so each question's numbers are the delta since the previous question,
-not a fresh count. See docs/04-serve.md#45--scalable for the required output shape.
-"""
+"""Run agents/answer.py over docs/questions-examples.md and write output/agent_usage.json."""
 
 from __future__ import annotations
 

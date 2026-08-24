@@ -2,22 +2,6 @@
 
 Bonus 1: recover the holdings behind a 13F-NT notice.
 
-Pershing Square Capital Management L.P. (CIK 1336528) filed a 13F-NT for
-2026 Q2 -- a notice with no information table of its own. Its cover page's
-otherManagersInfo/otherManager block names the parent filer directly:
-CIK 0002026053, "PERSHING SQUARE INC." That parent is not one of the 20
-roster managers, so its filing has to be fetched separately (same
-User-Agent/rate-limit rules as Chapter 1).
-
-The parent's cover page declares an otherManagers2Info list -- other
-managers whose positions are folded into this one filing, each with a
-sequence number. Rows in the parent's information table that carry that
-sequence number in otherManager belong to that manager, not to the parent
-itself. Rows with no otherManager reference are the parent's own positions
-and are excluded, per bonus-01-notice-attribution.md.
-
-Run (from the repo root, after Chapter 1-3 have produced output/*.parquet):
-    python3 src/bonus_notice_attribution.py
 """
 
 from __future__ import annotations

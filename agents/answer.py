@@ -1,20 +1,3 @@
-"""Your agent: a question in, a structured answer out.
-
-    python -m agents.answer "which manager held the largest Apple position in 2026 Q2?"
-
-Architecture (see submission/ASSUMPTIONS.md for the reasoning):
-
-    question -> planner.plan_query()   LLM, schema-constrained -> QueryPlan
-             -> executor.execute()     pure pandas over the read-only Parquet files
-             -> this module            formats {"answer", "unit", "sources"}
-
-The LLM only ever sees the user's question text; it never sees filing-sourced free
-text (name_of_issuer / title_of_class), and it never produces anything that gets
-executed as code or SQL -- only whitelisted enum/string fields that planner.py
-validates before executor.py touches the data. Manager/issuer name resolution
-happens locally in data.py via string matching, not through the model.
-"""
-
 from __future__ import annotations
 
 import json
@@ -38,7 +21,7 @@ def main(question: str) -> dict[str, Any]:
     try:
         plan = planner.plan_query(question)
         result = executor.execute(plan)
-    except Exception as exc:  # noqa: BLE001 -- a crash must still score as a null answer
+    except Exception as exc: 
         logger.warning("could not answer %r: %s", question, exc)
         return {"answer": None, "unit": "NONE", "sources": [],
                 "note": "Couldn't produce a valid query plan for this question."}
@@ -61,8 +44,6 @@ def _cli() -> int:
 
     result = main(sys.argv[1])
 
-    # Validated here so a shape mistake surfaces while you can still fix it. The grader
-    # parses stdout as JSON and reads exactly these three keys.
     if not isinstance(result, dict):
         print(f"main() must return a dict, got {type(result).__name__}", file=sys.stderr)
         return 1

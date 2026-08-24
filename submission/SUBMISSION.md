@@ -31,22 +31,37 @@ Mark what you completed. Partial work still gets read.
 
 ## Checklist
 
-- [ ] `python check_submission.py` passes
-- [ ] Repo is **private** and `dsrsBOT` is a collaborator with Read access
-- [ ] Video uploaded to MediaSpace, visibility **Unlisted**, link tested
-- [ ] Repository URL submitted at <https://ikompete.dsrs.illinois.edu/competition/16>
-- [ ] `python verify.py` passes
-- [ ] Pipeline run twice; output is byte-identical
-- [ ] `output/filings.parquet`, `output/holdings.parquet` committed
-- [ ] `output/filers.csv`, `output/filings/`, `submission/eda.py` committed
-- [ ] `DEPENDENCIES.md`, `AI_USAGE.md`, and `ASSUMPTIONS.md` filled in
-- [ ] No API keys, tokens, or credentials committed
-- [ ] Frozen files unmodified
+- [x] `python check_submission.py` passes
+- [x] Repo is **private** and `dsrsBOT` is a collaborator with Read access
+- [x] Video uploaded to MediaSpace, visibility **Unlisted**, link tested
+- [x] Repository URL submitted at <https://ikompete.dsrs.illinois.edu/competition/16>
+- [x] `python verify.py` passes
+- [x] Pipeline run twice; output is byte-identical
+- [x] `output/filings.parquet`, `output/holdings.parquet` committed
+- [x] `output/filers.csv`, `output/filings/`, `submission/eda.py` committed
+- [x] `DEPENDENCIES.md`, `AI_USAGE.md`, and `ASSUMPTIONS.md` filled in
+- [x] No API keys, tokens, or credentials committed
+- [x] Frozen files unmodified
 
 ## Anything we should know
 
-Trade-offs you made, things you would do with more time, parts you are unsure about.
-Being candid here does not count against you.
+The Chapter 4 agent was developed and tested against a local Ollama model
+(`llama3.2:3b`) rather than the grading endpoint (`google/gemma-4-31B-it`),
+since the grading endpoint was not available during development. The
+architecture, security model, and honest-null behavior are confirmed
+working correctly; however, I observed real non-determinism in the local
+model across identical calls (documented with specific evidence in
+ASSUMPTIONS.md), and one question type consistently fails locally due to
+the small model not reliably following the structured output format. I'd
+expect both issues to improve significantly against the actual vLLM
+grading endpoint, but was unable to confirm this directly.
+
+The most significant trade-off I'd flag is that I have not been able to verify
+answer accuracy end-to-end against the actual grading model, only that the
+pipeline is correctly wired, secure, and fails. With more time
+I would test against a larger model or the actual grading endpoint to
+validate real answer correctness.
+
 
 ## Video sharing
 

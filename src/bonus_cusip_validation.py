@@ -4,13 +4,6 @@ Bonus 2: check every CUSIP reported in the 2026 Q2 holdings against SEC's
 Official List of Section 13(f) Securities for that quarter, and produce
 output/bonus_cusip_validation.csv.
 
-The official list is a plain-text file, not the same format as our stored
-CUSIPs -- normalizing both sides before comparing is the first thing this
-script does, and it's the step most likely to manufacture false mismatches
-if skipped. See docs/bonus-02-cusip-validation.md.
-
-Run (from the repo root, after Chapter 1-3 have produced output/*.parquet):
-    python3 src/bonus_cusip_validation.py
 """
 
 from __future__ import annotations
@@ -35,10 +28,6 @@ OUTPUT_PATH = Path("output/bonus_cusip_validation.csv")
 
 TARGET_QUARTER = "2026Q2"
 
-# A CINS (foreign-security identifier) starts with a letter rather than a
-# digit -- see docs/SCHEMA.md and submission/eda.py's finding #8. These are
-# valid identifiers that simply aren't domestic CUSIPs, so they legitimately
-# won't appear on SEC's list of 13(f)-reportable securities the same way.
 CINS_LEADING_LETTER_RE = re.compile(r"^[A-Z]")
 
 
@@ -66,13 +55,6 @@ def parse_official_list(raw_text: str) -> dict[str, str]:
         Issuer Description   columns 41-67
         Status               columns 68-70 ('A' additions, 'D' deletions, blank)
 
-    Not whitespace-delimited -- splitting on runs of spaces silently breaks
-    on any issuer name padded with fewer than two spaces, or on a name that
-    happens to be immediately followed by a short description. Every row is
-    sliced by fixed character offset instead. The file also carries several
-    header/title lines before the data starts; any line whose first 9
-    characters don't look like a CUSIP token is skipped rather than assumed
-    to be a data row.
     """
     result: dict[str, str] = {}
     cusip_token_re = re.compile(r"^[A-Z0-9]{9}$")
@@ -97,8 +79,7 @@ def classify_unmatched(cusip: str, issuer_from_filing: str) -> str:
     """
     Best-effort classification for a CUSIP that didn't match the official
     list, after normalization has already been ruled out as the cause.
-    This is a heuristic starting point, not a verdict -- see
-    submission/ASSUMPTIONS.md for the manual review of each case.
+
     """
     if CINS_LEADING_LETTER_RE.match(cusip):
         return "CINS_FOREIGN"
@@ -133,9 +114,6 @@ def main() -> int:
 
     cik_to_name = filings.drop_duplicates("cik").set_index("cik")["fund_name"].to_dict()
 
-    # One row per (accession_number, cusip) pair, per the bonus spec --
-    # not one row per unique cusip, since the same CUSIP can be correct in
-    # one filing and mistyped in another.
     grouped = (
         q2_holdings
         .groupby(["accession_number", "cusip", "cusip_norm"])
@@ -194,7 +172,6 @@ def main() -> int:
     )
 
     # Print a summary of unmatched CUSIPs by assessment, so the console
-    # output itself is usable evidence for ASSUMPTIONS.md.
     unmatched_rows = [r for r in output_rows if not r["on_official_list"]]
     by_assessment: dict[str, int] = {}
     for r in unmatched_rows:

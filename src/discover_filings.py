@@ -3,24 +3,6 @@ discover_filings.py -- uses the verified CIKs in output/filers.csv to query the 
 submissions API, filtering for 2026 Q1/Q2 (periodOfReport = 2026-03-31 or 2026-06-30)
 13F filings.
 
-Rules:
-    1. Collect form types 13F-HR, 13F-HR/A, 13F-NT, 13F-NT/A.
-       A notice (NT) also counts as a filing in scope -- Chapter 3's schema explicitly
-       requires every filing to have its own filings.parquet row, even with no
-       holdings, and must not be traced back to another manager's CIK via otherManager.
-    2. Use periodOfReport (the holdings report period) to decide whether it's Q1/Q2
-       2026, not filingDate.
-    3. When the same CIK and periodOfReport have multiple entries (e.g. original +
-       amendment), keep only the one with the newest filingDate; ties keep the larger
-       accessionNumber.
-    4. filingDate must be <= 2026-08-18 (this chapter's cutoff date).
-    5. 20 filers x 2 quarters, expected output is 40 rows.
-
-Output: output/filings.csv
-Columns: fund_name, cik, accession, form, filingDate, periodOfReport, primaryDocument
-
-Usage (always run from the project root):
-    python3 src/discover_filings.py
 """
 
 from __future__ import annotations
@@ -158,8 +140,8 @@ def main() -> int:
 
     if len(all_rows) != 40:
         logger.warning(
-            "總筆數是 %d，跟預期的 40 筆（20 filer x 2 季）不一致，"
-            "請檢查上面缺漏的警告訊息。",
+            "Total row count is %d, which does not match the expected 40 rows "
+            "Need to check the missing-filing warnings above.",
             len(all_rows),
         )
 
