@@ -4,8 +4,8 @@ Fill this in and commit it. A submission missing the video link is incomplete.
 
 ## Who
 
-- **Name:**
-- **NetID:**
+- **Name:** Hsuan-Yu, Shih
+- **NetID:** hsuanyu5
 
 ## Video
 
@@ -15,19 +15,19 @@ a question.
 Upload to Illinois MediaSpace: https://mediaspace.illinois.edu/upload/media
 Set visibility to **Unlisted**.
 
-- **Link:**
+- **Link:** https://mediaspace.illinois.edu/media/t/1_z6vbt72v
 
 ## Chapters attempted
 
 Mark what you completed. Partial work still gets read.
 
-- [ ] 1 · Source
-- [ ] 2 · Interrogate
-- [ ] 3 · Structure
-- [ ] 4 · Serve
-- [ ] 5 · Show
-- [ ] Bonus 1 — Notice attribution
-- [ ] Bonus 2 — CUSIP validation
+- [x] 1 · Source
+- [x] 2 · Interrogate
+- [x] 3 · Structure
+- [x] 4 · Serve
+- [x] 5 · Show
+- [x] Bonus 1 — Notice attribution
+- [x] Bonus 2 — CUSIP validation
 
 ## Checklist
 
